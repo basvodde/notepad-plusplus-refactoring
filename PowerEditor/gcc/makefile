@@ -200,24 +200,27 @@ CXX				= g++
 #CXXFLAGS		= -O2 $(INCLUDESPECIAL)
 CXXFLAGS		= $(INCLUDESPECIAL) -DTIXML_USE_STL $(UNICODE) -DCYGWIN_BUILD
 CXXFLAGS 		+= -g
-INCLUDES		= $(patsubst %,-I%,$(DIRS)) -I./include
+INCLUDES		= $(patsubst %,-I%,$(DIRS)) -I./include -I../../cpputest/include
 LDFLAGS			= -Wl,--subsystem,windows
 LIBS			= -lcomdlg32 -lcomctl32 -lgdi32 -lole32 -loleacc -lshell32 -lshlwapi
 
-#CPPFLAGS_FOR_TEST = -DWINSHLWAPI=extern -DWINUSERAPI=extern
-
+CPPFLAGS_FOR_TEST = -DWINSHLWAPI=extern -DWINUSERAPI=extern
+CXXFLAGS += $(CPPFLAGS_FOR_TEST)
 RC				= windres
 
 OUT_NPP			= NotepadPP.exe
 
 EXEC			= ../bin/$(OUT_NPP)
 
-all: NotepadPP
+CPPUTEST_LIBRARIES = ../../cpputest/lib/libCppUTest.a ../../cpputest/lib/libCppUTestExt.a
 
 test: NotepadPP_tests
 
+all: NotepadPP
+
 NotepadPP_tests:  $(OBJS) $(OBJ_RES) $(OBJ_TESTS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $(OBJS) $(OBJ_RES) -o $(EXEC) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(OBJS) $(OBJ_TESTS) $(OBJ_RES) $(CPPUTEST_LIBRARIES) -o NotepadPP_tests
+	./NotepadPP_tests
 
 # Main Notepad++ rule
 NotepadPP: $(OBJS) $(OBJ_RES)
