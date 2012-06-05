@@ -407,6 +407,8 @@ const char * WcharMbcsConvertor::wchar2char(const wchar_t * wcharStr2Convert, UI
 	return _multiByteStr;
 }
 
+#ifndef CYGWIN_BUILD
+
 std::wstring string2wstring(const std::string & rString, UINT codepage)
 {
 	int len = MultiByteToWideChar(codepage, 0, rString.c_str(), -1, NULL, 0);
@@ -432,6 +434,7 @@ std::string wstring2string(const std::wstring & rwString, UINT codepage)
 	else
 		return "";
 }
+#endif
 
 // Escapes ampersands in file name to use it in menu
 template <typename T>
@@ -505,7 +508,7 @@ generic_string BuildMenuFileName(int filenameLen, unsigned int pos, const generi
 	if (filenameLen > 0)
 	{
 		std::vector<TCHAR> vt(filenameLen + 1);
-		PathCompactPathExW(&vt[0], filename.c_str(), filenameLen + 1, 0);
+		PathCompactPathEx(&vt[0], filename.c_str(), filenameLen + 1, 0);
 		strTemp.append(convertFileName(vt.begin(), vt.begin() + lstrlen(&vt[0])));
 	}
 	else

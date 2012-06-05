@@ -49,6 +49,7 @@ bool MiniDumper::writeDump(EXCEPTION_POINTERS * pExceptionInfo)
 
 	if (hDll)
 	{
+#ifndef CYGWIN_BUILD
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress( hDll, "MiniDumpWriteDump" );
 		if (pDump)
 		{
@@ -98,6 +99,9 @@ bool MiniDumper::writeDump(EXCEPTION_POINTERS * pExceptionInfo)
 		{
 			szResult = TEXT("The debugging DLL is outdated,\r\nfind a recent copy of dbghelp.dll and install it.");
 		}
+#else
+			assert(false);
+#endif
 	}
 	else
 	{

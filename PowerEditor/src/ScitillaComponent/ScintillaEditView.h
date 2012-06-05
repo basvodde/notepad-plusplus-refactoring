@@ -176,6 +176,10 @@ struct SortInSelectOrder {
 	bool operator() (ColumnModeInfo & l, ColumnModeInfo & r) {
 		return (l._order < r._order);
 	}
+
+	bool operator() (const ColumnModeInfo & l, const ColumnModeInfo & r) {
+		return (l._order < r._order);
+	}
 };
 
 //
@@ -183,6 +187,9 @@ struct SortInSelectOrder {
 // sort in _selLpos : increased order
 struct SortInPositionOrder {
 	bool operator() (ColumnModeInfo & l, ColumnModeInfo & r) {
+		return (l._selLpos < r._selLpos);
+	}
+	bool operator() (const ColumnModeInfo & l, const ColumnModeInfo & r) {
 		return (l._selLpos < r._selLpos);
 	}
 };

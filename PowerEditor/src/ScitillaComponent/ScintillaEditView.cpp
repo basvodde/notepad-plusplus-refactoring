@@ -163,7 +163,7 @@ void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 {
 	if (!_hLib)
 	{
-		throw std::exception("ScintillaEditView::init : SCINTILLA ERROR - Can not load the dynamic library");
+		throw std::runtime_error("ScintillaEditView::init : SCINTILLA ERROR - Can not load the dynamic library");
 	}
 
 	Window::init(hInst, hPere);
@@ -180,7 +180,7 @@ void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 
 	if (!_hSelf)
 	{
-		throw std::exception("ScintillaEditView::init : CreateWindowEx() function return null");
+		throw std::runtime_error("ScintillaEditView::init : CreateWindowEx() function return null");
 	}
 
 	_pScintillaFunc = (SCINTILLA_FUNC)::SendMessage(_hSelf, SCI_GETDIRECTFUNCTION, 0, 0);
@@ -190,12 +190,12 @@ void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 
 	if (!_pScintillaFunc)
 	{
-		throw std::exception("ScintillaEditView::init : SCI_GETDIRECTFUNCTION message failed");
+		throw std::runtime_error("ScintillaEditView::init : SCI_GETDIRECTFUNCTION message failed");
 	}
 
 	if (!_pScintillaPtr)
 	{
-		throw std::exception("ScintillaEditView::init : SCI_GETDIRECTPOINTER message failed");
+		throw std::runtime_error("ScintillaEditView::init : SCI_GETDIRECTPOINTER message failed");
 	}
 
     execute(SCI_SETMARGINMASKN, _SC_MARGE_FOLDER, SC_MASK_FOLDERS);
@@ -2265,8 +2265,11 @@ pair<int, int> ScintillaEditView::getSelectionLinesRange() const
 
     range.first = execute(SCI_LINEFROMPOSITION, start);
     range.second = execute(SCI_LINEFROMPOSITION, end);
-    if (range.first > range.second)
-        range.swap(range);
+    if (range.first > range.second) {
+    	int tmp = range.first;
+    	range.first = range.second;
+    	range.second = tmp;
+    }
     return range;
 }
 

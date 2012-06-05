@@ -36,6 +36,7 @@
 #include "various.h"
 
 // C RunTime Header Files
+#define _WIN32
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,8 +87,15 @@
 #define _ftelli64 ftell
 
 #undef generic_itoa
+
 #define itoa generic_itoa
-#define generic_itoa(integer,str,bufsize) sprintf("%d", str, integer)
+inline
+char* generic_itoa(int value, char * str, int base)
+{
+	assert(base == 10);
+	sprintf("%d", str, value);
+	return str;
+}
 #endif
 
 #endif // PRECOMPILEHEADER_H
