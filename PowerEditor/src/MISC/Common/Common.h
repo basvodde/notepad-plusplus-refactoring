@@ -98,8 +98,11 @@ std::vector<generic_string> tokenizeString(const generic_string & tokenString, c
 void ClientRectToScreenRect(HWND hWnd, RECT* rect);
 void ScreenRectToClientRect(HWND hWnd, RECT* rect);
 
+#ifndef CYGWIN_BUILD
 std::wstring string2wstring(const std::string & rString, UINT codepage);
 std::string wstring2string(const std::wstring & rwString, UINT codepage);
+#endif
+
 bool isInList(const TCHAR *token, const TCHAR *list);
 generic_string BuildMenuFileName(int filenameLen, unsigned int pos, const generic_string &filename);
 

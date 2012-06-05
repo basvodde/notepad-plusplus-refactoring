@@ -192,13 +192,13 @@ SRC_RES			= ./resources.rc
 OBJ_RES			= $(patsubst %.rc,%.res,$(SRC_RES))
 
 # Parameters
-INCLUDESPECIAL	= -include./include/various.h -includeCommon.h
+#INCLUDESPECIAL	= -include./include/various.h -includeCommon.h
 #    Comment this out for ANSI build
 #UNICODE         = -DUNICODE -D_UNICODE
 
 CXX				= g++
 #CXXFLAGS		= -O2 $(INCLUDESPECIAL)
-CXXFLAGS		= $(INCLUDESPECIAL) -DTIXML_USE_STL $(UNICODE)
+CXXFLAGS		= $(INCLUDESPECIAL) -DTIXML_USE_STL $(UNICODE) -DCYGWIN_BUILD
 CXXFLAGS 		+= -g
 INCLUDES		= $(patsubst %,-I%,$(DIRS)) -I./include
 LDFLAGS			= -Wl,--subsystem,windows

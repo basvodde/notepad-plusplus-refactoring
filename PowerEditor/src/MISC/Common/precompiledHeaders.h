@@ -33,6 +33,10 @@
 
 #define _WIN32_WINNT 0x0501
 
+#ifndef _WIN32_IE
+#define _WIN32_IE	0x0600
+#endif //_WIN32_IE
+
 // C RunTime Header Files
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,7 +67,9 @@
 #include <shlwapi.h>
 #include <uxtheme.h>
 #include <Oleacc.h>
+#ifndef CYGWIN_BUILD
 #include <dbghelp.h>
+#endif
 #include <eh.h>
 
 #ifdef UNICODE
@@ -75,4 +81,4 @@
 #include "Window.h"
 #include "StaticDialog.h"
 
-#endif PRECOMPILEHEADER_H
+#endif // PRECOMPILEHEADER_H

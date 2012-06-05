@@ -49,9 +49,9 @@ distribution.
 	#define TIXMLA_ISTREAM	std::istream
 	#define TIXMLA_OSTREAM	std::ostream
 #else
-	#include "tinystrA.h"
 	#define TIXMLA_STRING	TiXmlStringA
 	#define TIXMLA_OSTREAM	TiXmlOutStreamA
+	#include "tinystrA.h"
 #endif
 
 class TiXmlDocumentA;

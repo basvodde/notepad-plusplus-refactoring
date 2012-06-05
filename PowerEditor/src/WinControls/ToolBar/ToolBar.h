@@ -41,6 +41,7 @@
 #define _WIN32_IE	0x0600
 #endif //_WIN32_IE
 
+
 using namespace std;
 
 enum toolBarStatusType {/*TB_HIDE, */TB_SMALL, TB_LARGE, TB_STANDARD};
