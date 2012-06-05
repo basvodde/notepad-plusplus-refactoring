@@ -39,9 +39,9 @@ const int BORDERWIDTH_SMALLEST = 0;
 const int BORDERWIDTH_LARGEST = 30;
 const int BORDERWIDTH_INTERVAL = 1;
 
-// This int encoding array is built from "EncodingUnit encodings[]" (see EncodingMapper.cpp)
-// And DefaultNewDocDlg will use "int encoding array" to get more info from "EncodingUnit encodings[]"
-int encodings[] = {
+// This int encoding array is built from "EncodingUnit local_encoding[]" (see EncodingMapper.cpp)
+// And DefaultNewDocDlg will use "int encoding array" to get more info from "EncodingUnit local_encoding[]"
+int local_encoding[] = {
 	1250, 
 	1251, 
 	1252, 
@@ -990,17 +990,17 @@ BOOL CALLBACK DefaultNewDocDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM)
 			int selIndex = -1;
 			generic_string str;
 			EncodingMapper *em = EncodingMapper::getInstance();
-			for (int i = 0 ; i < sizeof(encodings)/sizeof(int) ; i++)
+			for (int i = 0 ; i < sizeof(local_encoding)/sizeof(int) ; i++)
 			{
-				int cmdID = em->getIndexFromEncoding(encodings[i]);
+				int cmdID = em->getIndexFromEncoding(local_encoding[i]);
 				if (cmdID != -1)
 				{
 					cmdID += IDM_FORMAT_ENCODE;
 					getNameStrFromCmd(cmdID, str);
 					int index = ::SendDlgItemMessage(_hSelf, IDC_COMBO_OTHERCP, CB_ADDSTRING, 0, (LPARAM)str.c_str());
-					if (ndds._codepage == encodings[i])
+					if (ndds._codepage == local_encoding[i])
 						selIndex = index;
-					::SendDlgItemMessage(_hSelf, IDC_COMBO_OTHERCP, CB_SETITEMDATA, index, (LPARAM)encodings[i]);
+					::SendDlgItemMessage(_hSelf, IDC_COMBO_OTHERCP, CB_SETITEMDATA, index, (LPARAM)local_encoding[i]);
 				}
 			}
 

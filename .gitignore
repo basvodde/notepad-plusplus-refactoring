@@ -1,1 +1,4 @@
 *.o
+PowerEditor/gcc/resources.res
+PowerEditor/bin/NotepadPP.exe
+
