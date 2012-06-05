@@ -1,4 +1,10 @@
 *.o
 PowerEditor/gcc/resources.res
+PowerEditor/gcc/NotepadPP_tests.exe
 PowerEditor/bin/NotepadPP.exe
+cpputest/CppUTest_tests.exe
+cpputest/CppUTestExt_tests.exe
+cpputest/lib/libCppUTest.a
+cpputest/lib/libCppUTestExt.a
+cpputest/objs
 
