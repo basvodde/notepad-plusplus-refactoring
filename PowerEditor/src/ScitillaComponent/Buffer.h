@@ -89,7 +89,7 @@ public:
 
 	void addBufferReference(BufferID id, ScintillaEditView * identifer);	//called by Scintilla etc indirectly
 
-	BufferID loadFile(const TCHAR * filename, Document doc = NULL, int encoding = -1);	//ID == BUFFER_INVALID on failure. If Doc == NULL, a new file is created, otherwise data is loaded in given document
+	virtual BufferID loadFile(const TCHAR * filename, Document doc = NULL, int encoding = -1);	//ID == BUFFER_INVALID on failure. If Doc == NULL, a new file is created, otherwise data is loaded in given document
 	BufferID newEmptyDocument();
 	//create Buffer from existing Scintilla, used from new Scintillas. If dontIncrease = true, then the new document number isnt increased afterwards.
 	//usefull for temporary but neccesary docs
@@ -108,6 +108,11 @@ public:
 	bool createEmptyFile(const TCHAR * path);
 
 	static FileManager * getInstance() {return _pSelf;};
+	static FileManager * setInstance(FileManager* newSelf) {
+		FileManager* oldSelf = _pSelf;
+		_pSelf = newSelf;
+		return oldSelf;
+	}
 	void destroyInstance() { delete _pSelf; };
 
 	void increaseDocNr() {_nextNewNumber++;};
@@ -118,9 +123,9 @@ public:
 
 	int getEOLFormatForm(const char *data) const;
 
-private:
 	FileManager() : _nextNewNumber(1), _nextBufferID(0), _pNotepadPlus(NULL), _nrBufs(0), _pscratchTilla(NULL){};
-	~FileManager();
+	virtual ~FileManager();
+private:
 	static FileManager *_pSelf;
 
 	Notepad_plus * _pNotepadPlus;

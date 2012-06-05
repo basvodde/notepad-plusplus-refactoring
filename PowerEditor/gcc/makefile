@@ -215,12 +215,12 @@ EXEC			= ../bin/$(OUT_NPP)
 CPPUTEST_LIBRARIES = ../../cpputest/lib/libCppUTest.a ../../cpputest/lib/libCppUTestExt.a
 
 test: NotepadPP_tests
-
+	./NotepadPP_tests
+	
 all: NotepadPP
 
 NotepadPP_tests:  $(OBJS) $(OBJ_RES) $(OBJ_TESTS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(OBJS) $(OBJ_TESTS) $(OBJ_RES) $(CPPUTEST_LIBRARIES) -o NotepadPP_tests
-	./NotepadPP_tests
 
 # Main Notepad++ rule
 NotepadPP: $(OBJS) $(OBJ_RES)

@@ -12,6 +12,9 @@ BOOL WINAPI PathFileExistsA(LPCSTR filename)
 	if (!app_started) return TRUE;
 
 	mock().actualCall("PathFileExistsA").withParameter("filename", filename);
+
+	if (mock().hasReturnValue())
+		return (bool) mock().returnValue().getIntValue();
 	return TRUE;
 }
 
@@ -493,6 +496,12 @@ DWORD WINAPI GetFullPathNameA(LPCSTR lpFileName,DWORD nBufferLength, LPSTR lpBuf
 {
 	mock().actualCall("GetFullPathNameA").withParameter("lpFileName", lpFileName).withParameter("nBufferLength", (int) nBufferLength)
 			.withParameter("lpBuffer", lpBuffer).withParameter("lpFilePart", lpFilePart);
+
+	if (mock().hasData("GetFullPathNameA_filename")) {
+		const char* output_filename = mock().getData("GetFullPathNameA_filename").getStringValue();
+		strncpy(lpBuffer, output_filename , min(strlen(output_filename)+1, nBufferLength));
+	}
+
 	return 0;
 }
 
@@ -500,5 +509,10 @@ DWORD WINAPI GetLongPathNameA(LPCSTR lpszShortPath,LPSTR lpszLongPath,DWORD cchB
 {
 	mock().actualCall("GetLongPathNameA").withParameter("lpszShortPath", lpszShortPath).withParameter("lpszLongPath", lpszLongPath)
 			.withParameter("cchBuffer", (int) cchBuffer);
+	if (mock().hasData("GetFullPathNameA_filename")) {
+		const char* output_filename = mock().getData("GetLongPathNameA_filename").getStringValue();
+		strncpy(lpszLongPath, output_filename , min(strlen(output_filename)+1, cchBuffer));
+	}
+
 	return 0;
 }

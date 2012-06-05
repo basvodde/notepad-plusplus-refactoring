@@ -58,10 +58,10 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		//Dont switch, not responsibility of doOpen, but of caller
 		if (_pTrayIco) {
 			if (_pTrayIco->isInTray()) {
-				::ShowWindow(_pPublicInterface->getHSelf(), SW_SHOW);
+				::ShowWindow(getMainWindowHandle(), SW_SHOW);
 				if (!_pPublicInterface->isPrelaunch())
 					_pTrayIco->doTrayIcon(REMOVE);
-				::SendMessage(_pPublicInterface->getHSelf(), WM_SIZE, 0, 0);
+				::SendMessage(getMainWindowHandle(), WM_SIZE, 0, 0);
 			}
 		}
 		return test;
@@ -86,13 +86,13 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		bool isCreateFileSuccessful = false;
 		if (PathFileExists(longFileDir.c_str())) {
 			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), longFileName);
-			if (::MessageBox(_pPublicInterface->getHSelf(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
+			if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
 				bool res = MainFileManager->createEmptyFile(longFileName);
 				if (res)
 					isCreateFileSuccessful = true;
 				else {
 					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), longFileName);
-					::MessageBox(_pPublicInterface->getHSelf(), str2display, TEXT("Create new file"), MB_OK);
+					::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
 				}
 			}
 		}
@@ -110,7 +110,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	// Plugins can should use this notification to filter SCN_MODIFIED
 	SCNotification scnN;
 	scnN.nmhdr.code = NPPN_FILEBEFORELOAD;
-	scnN.nmhdr.hwndFrom = _pPublicInterface->getHSelf();
+	scnN.nmhdr.hwndFrom = getMainWindowHandle();
 	scnN.nmhdr.idFrom = NULL;
 	_pluginsManager.notify(&scnN);
 
@@ -137,10 +137,10 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 
 		if (_pTrayIco) {
 			if (_pTrayIco->isInTray()) {
-				::ShowWindow(_pPublicInterface->getHSelf(), SW_SHOW);
+				::ShowWindow(getMainWindowHandle(), SW_SHOW);
 				if (!_pPublicInterface->isPrelaunch())
 					_pTrayIco->doTrayIcon(REMOVE);
-				::SendMessage(_pPublicInterface->getHSelf(), WM_SIZE, 0, 0);
+				::SendMessage(getMainWindowHandle(), WM_SIZE, 0, 0);
 			}
 		}
 		PathRemoveFileSpec(longFileName);
@@ -171,7 +171,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 			bool ok2Open = true;
 			if (nbFiles2Open > 200) {
 				int answer = _nativeLangSpeaker.messageBox("NbFileToOpenImportantWarning",
-												_pPublicInterface->getHSelf(),
+												getMainWindowHandle(),
 												TEXT("$INT_REPLACE$ files are about to be opened.\rAre you sure to open them?"),
 												TEXT("Amount of files to open is too large"),
 												MB_YESNO|MB_APPLMODAL,
@@ -190,7 +190,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 			generic_string msg = TEXT("Can not open file \"");
 			msg += longFileName;
 			msg += TEXT("\".");
-			::MessageBox(_pPublicInterface->getHSelf(), msg.c_str(), TEXT("ERROR"), MB_OK);
+			::MessageBox(getMainWindowHandle(), msg.c_str(), TEXT("ERROR"), MB_OK);
 			_isFileOpening = false;
 
 			scnN.nmhdr.code = NPPN_FILELOADFAILED;
@@ -210,7 +210,7 @@ bool Notepad_plus::doReload(BufferID id, bool alert)
 	if (alert)
 	{
 		int answer = _nativeLangSpeaker.messageBox("DocReloadWarning",
-			_pPublicInterface->getHSelf(),
+			getMainWindowHandle(),
 			TEXT("Are you sure you want to reload the current file and lose the changes made in Notepad++?"),
 			TEXT("Reload"), 
 			MB_YESNO | MB_ICONEXCLAMATION | MB_APPLMODAL);
@@ -256,7 +256,7 @@ bool Notepad_plus::doSave(BufferID id, const TCHAR * filename, bool isCopy)
 	{
 		
 		scnN.nmhdr.code = NPPN_FILEBEFORESAVE;
-		scnN.nmhdr.hwndFrom = _pPublicInterface->getHSelf();
+		scnN.nmhdr.hwndFrom = getMainWindowHandle();
 		scnN.nmhdr.idFrom = (uptr_t)id;
 		_pluginsManager.notify(&scnN);
 	}
@@ -271,7 +271,7 @@ bool Notepad_plus::doSave(BufferID id, const TCHAR * filename, bool isCopy)
 
 	if (!res)
 		_nativeLangSpeaker.messageBox("FileLockedWarning",
-		_pPublicInterface->getHSelf(),
+		getMainWindowHandle(),
 		TEXT("Please check if this file is opened in another program."),
 		TEXT("Save failed"), 
 		MB_OK);
@@ -284,7 +284,7 @@ void Notepad_plus::doClose(BufferID id, int whichOne) {
 	// Notify plugins that current file is about to be closed
 	SCNotification scnN;
 	scnN.nmhdr.code = NPPN_FILEBEFORECLOSE;
-	scnN.nmhdr.hwndFrom = _pPublicInterface->getHSelf();
+	scnN.nmhdr.hwndFrom = getMainWindowHandle();
 	scnN.nmhdr.idFrom = (uptr_t)id;
 	_pluginsManager.notify(&scnN);
 
@@ -324,7 +324,7 @@ void Notepad_plus::doClose(BufferID id, int whichOne) {
 
 		// if the current activated buffer is in this view, 
 		// then get buffer ID to remove the entry from File Switcher Pannel
-		hiddenBufferID = ::SendMessage(_pPublicInterface->getHSelf(), NPPM_GETBUFFERIDFROMPOS, 0, whichOne);
+		hiddenBufferID = ::SendMessage(getMainWindowHandle(), NPPM_GETBUFFERIDFROMPOS, 0, whichOne);
 	}
 
 	// Notify plugins that current file is closed
@@ -337,7 +337,7 @@ void Notepad_plus::doClose(BufferID id, int whichOne) {
 		// if the same buffer ID is not found then remove the entry from File Switcher Pannel
 		if (_pFileSwitcherPanel)
 		{
-			//int posInfo = ::SendMessage(_pPublicInterface->getHSelf(), NPPM_GETPOSFROMBUFFERID, (WPARAM)id ,0);
+			//int posInfo = ::SendMessage(getMainWindowHandle(), NPPM_GETPOSFROMBUFFERID, (WPARAM)id ,0);
 				
 			_pFileSwitcherPanel->closeItem((int)id, whichOne);
 
@@ -787,7 +787,7 @@ bool Notepad_plus::fileSaveAs(BufferID id, bool isSaveCopy)
 		bufferID = _pEditView->getCurrentBufferID();
 	Buffer * buf = MainFileManager->getBufferByID(bufferID);
 
-	FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+	FileDialog fDlg(getMainWindowHandle(), _pPublicInterface->getHinst());
 
     fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);
 	int langTypeIndex = setFileOpenSaveDlgFilters(fDlg, buf->getLangType());
@@ -809,7 +809,7 @@ bool Notepad_plus::fileSaveAs(BufferID id, bool isSaveCopy)
 		else		//cannot save, other view has buffer already open, activate it
 		{
 			_nativeLangSpeaker.messageBox("FileAlreadyOpenedInNpp",
-				_pPublicInterface->getHSelf(),
+				getMainWindowHandle(),
 				TEXT("The file is already opened in the Notepad++."),
 				TEXT("ERROR"),
 				MB_OK | MB_ICONSTOP);
@@ -831,7 +831,7 @@ bool Notepad_plus::fileRename(BufferID id)
 		bufferID = _pEditView->getCurrentBufferID();
 	Buffer * buf = MainFileManager->getBufferByID(bufferID);
 
-	FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+	FileDialog fDlg(getMainWindowHandle(), _pPublicInterface->getHinst());
 
     fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);
 	setFileOpenSaveDlgFilters(fDlg);
@@ -861,7 +861,7 @@ bool Notepad_plus::fileDelete(BufferID id)
 		if (!MainFileManager->deleteFile(bufferID))
 		{
 			_nativeLangSpeaker.messageBox("DeleteFileFailed",
-				_pPublicInterface->getHSelf(),
+				getMainWindowHandle(),
 				TEXT("Delete File failed"),
 				TEXT("Delete File"),
 				MB_OK);
@@ -876,7 +876,7 @@ bool Notepad_plus::fileDelete(BufferID id)
 
 void Notepad_plus::fileOpen()
 {
-    FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+    FileDialog fDlg(getMainWindowHandle(), _pPublicInterface->getHinst());
 	fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);
 	
 	setFileOpenSaveDlgFilters(fDlg);
@@ -1111,7 +1111,7 @@ bool Notepad_plus::fileLoadSession(const TCHAR *fn)
 	const TCHAR *sessionFileName = NULL;
 	if (fn == NULL)
 	{
-		FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+		FileDialog fDlg(getMainWindowHandle(), _pPublicInterface->getHinst());
 		fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);
 		const TCHAR *ext = NppParameters::getInstance()->getNppGUI()._definedSessionExt.c_str();
 		generic_string sessionExt = TEXT("");
@@ -1172,7 +1172,7 @@ const TCHAR * Notepad_plus::fileSaveSession(size_t nbFile, TCHAR ** fileNames)
 {
 	const TCHAR *sessionFileName = NULL;
 	
-	FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+	FileDialog fDlg(getMainWindowHandle(), _pPublicInterface->getHinst());
 	const TCHAR *ext = NppParameters::getInstance()->getNppGUI()._definedSessionExt.c_str();
 
 	fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);

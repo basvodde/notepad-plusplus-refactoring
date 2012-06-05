@@ -191,6 +191,9 @@ Notepad_plus::~Notepad_plus()
 }
 
 
+HWND Notepad_plus::getMainWindowHandle() {
+	return _pPublicInterface->getHSelf();
+}
 
 
 LRESULT Notepad_plus::init(HWND hwnd) 

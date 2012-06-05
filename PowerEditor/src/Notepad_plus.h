@@ -292,7 +292,7 @@ public:
 	};
 	bool emergency(generic_string emergencySavedDir);
 
-	
+	virtual HWND getMainWindowHandle();
 private:
 	Notepad_plus_Window *_pPublicInterface;
     Window *_pMainWindow;
