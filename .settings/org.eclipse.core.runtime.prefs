@@ -1,0 +1,6 @@
+#Tue Jun 05 11:44:22 CST 2012
+content-types/enabled=false
+content-types/org.eclipse.cdt.core.cHeader/file-extensions=h
+content-types/org.eclipse.cdt.core.cHeader/file-names=vector
+content-types/org.eclipse.cdt.core.cxxSource/file-extensions=cpp
+eclipse.preferences.version=1
