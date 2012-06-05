@@ -58,7 +58,8 @@
 #include <map>
 #include <memory>
 #include <algorithm>
-#include <exception>	
+#include <exception>
+#include <stdexcept>
 
 // Windows Header Files
 #include <windows.h>
