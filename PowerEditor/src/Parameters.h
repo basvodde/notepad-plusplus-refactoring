@@ -1116,6 +1116,7 @@ class NppParameters
 {
 public:
     static NppParameters * getInstance() {return _pSelf;};
+    static void setInstance(NppParameters * newSelf) {_pSelf = newSelf;};
 	static LangType getLangIDFromStr(const TCHAR *langName);
 	bool load();
 	bool reloadLang();
@@ -1446,9 +1447,9 @@ public:
 		return _isLocal;
 	};
 
-private:
     NppParameters();
 	~NppParameters();
+private:
 
     static NppParameters *_pSelf;
 

@@ -87,7 +87,7 @@ public:
 
 	void closeBuffer(BufferID, ScintillaEditView * identifer);		//called by Notepad++
 
-	void addBufferReference(BufferID id, ScintillaEditView * identifer);	//called by Scintilla etc indirectly
+	virtual void addBufferReference(BufferID id, ScintillaEditView * identifer);	//called by Scintilla etc indirectly
 
 	virtual BufferID loadFile(const TCHAR * filename, Document doc = NULL, int encoding = -1);	//ID == BUFFER_INVALID on failure. If Doc == NULL, a new file is created, otherwise data is loaded in given document
 	BufferID newEmptyDocument();

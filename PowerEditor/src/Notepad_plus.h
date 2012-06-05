@@ -293,7 +293,7 @@ public:
 	bool emergency(generic_string emergencySavedDir);
 
 	virtual HWND getMainWindowHandle();
-private:
+protected:
 	Notepad_plus_Window *_pPublicInterface;
     Window *_pMainWindow;
 	DockingManager _dockingManager;
@@ -460,7 +460,7 @@ private:
 	void docGotoAnotherEditView(FileTransferMode mode);	//TransferMode
 	void docOpenInNewInstance(FileTransferMode mode, int x = 0, int y = 0);
 
-	void loadBufferIntoView(BufferID id, int whichOne, bool dontClose = false);		//Doesnt _activate_ the buffer
+	virtual void loadBufferIntoView(BufferID id, int whichOne, bool dontClose = false);		//Doesnt _activate_ the buffer
 	bool removeBufferFromView(BufferID id, int whichOne);	//Activates alternative of possible, or creates clean document if not clean already
 
 	bool activateBuffer(BufferID id, int whichOne);			//activate buffer in that view if found

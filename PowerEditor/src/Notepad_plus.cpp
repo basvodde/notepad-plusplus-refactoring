@@ -157,9 +157,11 @@ Notepad_plus::Notepad_plus(): _mainWindowStatus(0), _pDocTab(NULL), _pEditView(N
 // its children windows' handles will be destroyed automatically!
 Notepad_plus::~Notepad_plus()
 {
-	(NppParameters::getInstance())->destroyInstance();
-	MainFileManager->destroyInstance();
-	(WcharMbcsConvertor::getInstance())->destroyInstance();
+
+// Destroying all Singletons here makes it nearly untestable. Commented out!
+//	(NppParameters::getInstance())->destroyInstance();
+//	MainFileManager->destroyInstance();
+//	(WcharMbcsConvertor::getInstance())->destroyInstance();
 	if (_pTrayIco)
 		delete _pTrayIco;
 

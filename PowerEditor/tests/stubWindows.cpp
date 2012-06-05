@@ -18,10 +18,12 @@ BOOL WINAPI PathFileExistsA(LPCSTR filename)
 	return TRUE;
 }
 
-BOOL WINAPI PathRemoveFileSpecA(LPSTR)
+BOOL WINAPI PathRemoveFileSpecA(LPSTR filename)
 {
-	if (app_started)
-		FAIL("PathRemoveFileSpecA");
+	if (!app_started) return TRUE;
+
+	mock().actualCall("PathRemoveFileSpecA").withParameter("filename", filename);
+
 	return TRUE;
 }
 
@@ -36,9 +38,13 @@ void WINAPI PathRemoveExtensionA(LPSTR)
 	FAIL("PathRemoveExtensionA");
 }
 
-LPSTR WINAPI PathFindExtensionA(LPCSTR)
+LPSTR WINAPI PathFindExtensionA(LPCSTR filename)
 {
-	FAIL("PathFindExtensionA");
+	mock().actualCall("PathFindExtension").withParameter("filename", filename);
+
+	if (mock().hasReturnValue())
+		return (LPSTR) mock().returnValue().getStringValue();
+
 	return NULL;
 }
 
@@ -122,9 +128,9 @@ COLORREF WINAPI GetPixel(HDC,int,int)
 	return NULL;
 }
 
-BOOL WINAPI DeleteObject(HGDIOBJ)
+BOOL WINAPI DeleteObject(HGDIOBJ obj)
 {
-	FAIL("DeleteObject");
+	mock().actualCall("DeleteObject").withParameter("obj", obj);
 	return FALSE;
 }
 
