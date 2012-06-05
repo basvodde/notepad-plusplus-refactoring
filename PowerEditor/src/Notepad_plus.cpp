@@ -1432,7 +1432,7 @@ int Notepad_plus::doSaveOrNot(const TCHAR *fn)
 int Notepad_plus::doReloadOrNot(const TCHAR *fn, bool dirty) 
 {
 	TCHAR* pattern = TEXT("%s\r\rThis file has been modified by another program.\rDo you want to reload it%s?");
-	TCHAR* lose_info_str = dirty ? TEXT(" and lose the changes made in Notepad++") : TEXT("");
+	TCHAR* lose_info_str = dirty ? (TCHAR*) TEXT(" and lose the changes made in Notepad++") : (TCHAR*) TEXT("");
 	TCHAR phrase[512];
 	wsprintf(phrase, pattern, fn, lose_info_str);
 	int icon = dirty ? MB_ICONEXCLAMATION : MB_ICONQUESTION;

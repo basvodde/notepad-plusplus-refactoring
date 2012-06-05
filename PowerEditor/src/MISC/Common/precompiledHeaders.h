@@ -33,9 +33,7 @@
 
 #define _WIN32_WINNT 0x0501
 
-#ifndef _WIN32_IE
-#define _WIN32_IE	0x0600
-#endif //_WIN32_IE
+#include "various.h"
 
 // C RunTime Header Files
 #include <stdio.h>
@@ -81,5 +79,15 @@
 #include "Common.h"
 #include "Window.h"
 #include "StaticDialog.h"
+
+#ifdef CYGWIN_BUILD
+#define _stat stat
+#define _fseeki64 fseek
+#define _ftelli64 ftell
+
+#undef generic_itoa
+#define itoa generic_itoa
+#define generic_itoa(integer,str,bufsize) sprintf("%d", str, integer)
+#endif
 
 #endif // PRECOMPILEHEADER_H

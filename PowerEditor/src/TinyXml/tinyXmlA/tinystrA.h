@@ -21,6 +21,8 @@ must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source 
 distribution.
 */
+#ifndef TINYSTRA_INCLUDED
+#define TINYSTRA_INCLUDED
 
 #ifndef TINYXMLA_INCLUDED
 #include "tinyxmlA.h"
@@ -234,3 +236,4 @@ public :
 
 #endif	// TIXMLA_STRING_INCLUDED
 #endif	// TIXMLA_USE_STL
+#endif // TINYSTRA_INCLUDED

@@ -621,6 +621,7 @@ void ProjectPanel::notified(LPNMHDR notification)
 
 			case TVN_KEYDOWN:
 			{
+#ifndef CYGWIN_BUILD
 				//tvItem.hItem = _treeView.getSelection();
 				//::SendMessage(_treeView.getHSelf(), TVM_GETITEM, 0,(LPARAM)&tvItem);
 				LPNMTVKEYDOWN ptvkd = (LPNMTVKEYDOWN)notification;
@@ -659,7 +660,9 @@ void ProjectPanel::notified(LPNMHDR notification)
 				}
 				else if (ptvkd->wVKey == VK_F2)
 					popupMenuCmd(IDM_PROJECT_RENAME);
-				
+#else
+				assert(false);
+#endif
 			}
 			break;
 

@@ -25,6 +25,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#ifdef CYGWIN_BUILD
+#define HDF_SORTUP 1
+#define HDF_SORTDOWN 2
+#endif
 
 #include "precompiledHeaders.h"
 #include "VerticalFileSwitcher.h"
