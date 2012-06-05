@@ -48,23 +48,16 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	size_t res = gs_fileName.find_first_of(UNTITLED_STR);
 	 
 	if (res != string::npos && res == 0)
-	{
 		fileName2Find = fileName;
-	}
 	else
-	{
 		fileName2Find = longFileName;
-	}
 
 	BufferID test = MainFileManager->getBufferFromName(fileName2Find);
-	if (test != BUFFER_INVALID)
-	{
+	if (test != BUFFER_INVALID) {
 		//switchToFile(test);
 		//Dont switch, not responsibility of doOpen, but of caller
-		if (_pTrayIco)
-		{
-			if (_pTrayIco->isInTray())
-			{
+		if (_pTrayIco) {
+			if (_pTrayIco->isInTray()) {
 				::ShowWindow(_pPublicInterface->getHSelf(), SW_SHOW);
 				if (!_pPublicInterface->isPrelaunch())
 					_pTrayIco->doTrayIcon(REMOVE);
@@ -74,48 +67,38 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		return test;
 	}
 
-	if (isFileSession(longFileName) && PathFileExists(longFileName)) 
-	{
+	if (isFileSession(longFileName) && PathFileExists(longFileName)) {
 		fileLoadSession(longFileName);
 		return BUFFER_INVALID;
 	}
 
 	bool isWow64Off = false;
-	if (!PathFileExists(longFileName))
-	{
+	if (!PathFileExists(longFileName)) {
 		pNppParam->safeWow64EnableWow64FsRedirection(FALSE);
 		isWow64Off = true;
 	}
 
-	if (!PathFileExists(longFileName))
-	{
+	if (!PathFileExists(longFileName)) {
 		TCHAR str2display[MAX_PATH*2];
 		generic_string longFileDir(longFileName);
 		PathRemoveFileSpec(longFileDir);
 
 		bool isCreateFileSuccessful = false;
-		if (PathFileExists(longFileDir.c_str()))
-		{
+		if (PathFileExists(longFileDir.c_str())) {
 			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), longFileName);
-			if (::MessageBox(_pPublicInterface->getHSelf(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES)
-			{
+			if (::MessageBox(_pPublicInterface->getHSelf(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
 				bool res = MainFileManager->createEmptyFile(longFileName);
 				if (res)
-				{
 					isCreateFileSuccessful = true;
-				}
-				else
-				{
+				else {
 					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), longFileName);
 					::MessageBox(_pPublicInterface->getHSelf(), str2display, TEXT("Create new file"), MB_OK);
 				}
 			}
 		}
 
-		if (!isCreateFileSuccessful)
-		{
-			if (isWow64Off)
-			{
+		if (!isCreateFileSuccessful) {
+			if (isWow64Off) {
 				pNppParam->safeWow64EnableWow64FsRedirection(TRUE);
 				isWow64Off = false;
 			}
@@ -132,14 +115,11 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	_pluginsManager.notify(&scnN);
 
 	if (encoding == -1)
-	{
 		encoding = getHtmlXmlEncoding(longFileName);
-	}
 	
 	BufferID buffer = MainFileManager->loadFile(longFileName, NULL, encoding);
 
-	if (buffer != BUFFER_INVALID)
-	{
+	if (buffer != BUFFER_INVALID) {
 		_isFileOpening = true;
 
 		Buffer * buf = MainFileManager->getBufferByID(buffer);
@@ -155,10 +135,8 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 
 		loadBufferIntoView(buffer, currentView());
 
-		if (_pTrayIco)
-		{
-			if (_pTrayIco->isInTray())
-			{
+		if (_pTrayIco) {
+			if (_pTrayIco->isInTray()) {
 				::ShowWindow(_pPublicInterface->getHSelf(), SW_SHOW);
 				if (!_pPublicInterface->isPrelaunch())
 					_pTrayIco->doTrayIcon(REMOVE);
@@ -177,10 +155,8 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		if (_pFileSwitcherPanel)
 			_pFileSwitcherPanel->newItem((int)buf, currentView());
 	}
-	else
-	{
-		if (::PathIsDirectory(fileName))
-		{
+	else {
+		if (::PathIsDirectory(fileName)) {
 			vector<generic_string> fileNames;
 			vector<generic_string> patterns;
 			patterns.push_back(TEXT("*.*"));
@@ -193,8 +169,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 			size_t nbFiles2Open = fileNames.size();
 
 			bool ok2Open = true;
-			if (nbFiles2Open > 200)
-			{
+			if (nbFiles2Open > 200) {
 				int answer = _nativeLangSpeaker.messageBox("NbFileToOpenImportantWarning",
 												_pPublicInterface->getHSelf(),
 												TEXT("$INT_REPLACE$ files are about to be opened.\rAre you sure to open them?"),
@@ -204,16 +179,14 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 				ok2Open = answer == IDYES;
 			}
 
-			if (ok2Open)
-			{
+			if (ok2Open) {
 				for (size_t i = 0 ; i < nbFiles2Open ; i++)
 				{
 					doOpen(fileNames[i].c_str());
 				}
 			}
 		}
-		else
-		{
+		else {
 			generic_string msg = TEXT("Can not open file \"");
 			msg += longFileName;
 			msg += TEXT("\".");
@@ -225,8 +198,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		}
 	}
 
-	if (isWow64Off)
-	{
+	if (isWow64Off) {
 		pNppParam->safeWow64EnableWow64FsRedirection(TRUE);
 		isWow64Off = false;
 	}
