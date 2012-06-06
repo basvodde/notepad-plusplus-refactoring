@@ -194,8 +194,11 @@ public:
 	NotepadFile(const TCHAR* filename, int encoding);
 
 	const TCHAR* getOriginalFileName();
+	const TCHAR* getLongFileName();
+
 	int getEncoding();
 private:
+	TCHAR _longFileName[MAX_PATH];
 	int _encoding;
 	const TCHAR* _originalFileName;
 };

@@ -69,11 +69,18 @@ private:
 NotepadFile::NotepadFile(const TCHAR* filename, int encoding)
 	: _originalFileName(filename), _encoding(encoding)
 {
+	::GetFullPathName(_originalFileName, MAX_PATH, _longFileName, NULL);
+	::GetLongPathName(_longFileName, _longFileName, MAX_PATH);
 }
 
 const TCHAR* NotepadFile::getOriginalFileName()
 {
 	return _originalFileName;
+}
+
+const TCHAR* NotepadFile::getLongFileName()
+{
+	return _longFileName;
 }
 
 int NotepadFile::getEncoding()
@@ -89,16 +96,12 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 
 BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
 {
-	TCHAR longFileName[MAX_PATH];
-	::GetFullPathName(notepadFile.getOriginalFileName(), MAX_PATH, longFileName, NULL);
-	::GetLongPathName(longFileName, longFileName, MAX_PATH);
-
-	_lastRecentFileList.remove(longFileName);
+	_lastRecentFileList.remove(notepadFile.getLongFileName());
 
 	generic_string gs_fileName = notepadFile.getOriginalFileName();
 	size_t res = gs_fileName.find_first_of(UNTITLED_STR);
 	 
-	const TCHAR * fileName2Find = (res == 0) ? notepadFile.getOriginalFileName() : longFileName;
+	const TCHAR * fileName2Find = (res == 0) ? notepadFile.getOriginalFileName() : notepadFile.getLongFileName();
 	BufferID test = MainFileManager->getBufferFromName(fileName2Find);
 	if (test != BUFFER_INVALID) {
 		//switchToFile(test);
@@ -107,28 +110,28 @@ BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
 		return test;
 	}
 
-	if (isFileSession(longFileName) && PathFileExists(longFileName)) {
-		fileLoadSession(longFileName);
+	if (isFileSession(notepadFile.getLongFileName()) && PathFileExists(notepadFile.getLongFileName())) {
+		fileLoadSession(notepadFile.getLongFileName());
 		return BUFFER_INVALID;
 	}
 
 	TemporaryWow64FsRedirectionSwitch wow64FsRedirectionSwitch;
-	if (!PathFileExists(longFileName))
+	if (!PathFileExists(notepadFile.getLongFileName()))
 		wow64FsRedirectionSwitch.switchOff();
 
-	if (!PathFileExists(longFileName)) {
+	if (!PathFileExists(notepadFile.getLongFileName())) {
 		TCHAR str2display[MAX_PATH*2];
-		generic_string longFileDir(longFileName);
+		generic_string longFileDir(notepadFile.getLongFileName());
 		PathRemoveFileSpec(longFileDir);
 
 		bool isCreateFileSuccessful = false;
 		if (PathFileExists(longFileDir.c_str())) {
-			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), longFileName);
+			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), notepadFile.getLongFileName());
 			if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
-				if (MainFileManager->createEmptyFile(longFileName))
+				if (MainFileManager->createEmptyFile(notepadFile.getLongFileName()))
 					isCreateFileSuccessful = true;
 				else {
-					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), longFileName);
+					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), notepadFile.getLongFileName());
 					::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
 				}
 			}
@@ -147,9 +150,9 @@ BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
 
 	int encoding = notepadFile.getEncoding();
 	if (encoding == -1)
-		encoding = getHtmlXmlEncoding(longFileName);
+		encoding = getHtmlXmlEncoding(notepadFile.getLongFileName());
 	
-	BufferID buffer = MainFileManager->loadFile(longFileName, NULL, encoding);
+	BufferID buffer = MainFileManager->loadFile(notepadFile.getLongFileName(), NULL, encoding);
 
 	if (buffer != BUFFER_INVALID) {
 		Buffer * buf = MainFileManager->getBufferByID(buffer);
@@ -175,13 +178,13 @@ BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
 			_pFileSwitcherPanel->newItem((int)buf, currentView());
 	}
 	else {
-		if (::PathIsDirectory(longFileName)) {
+		if (::PathIsDirectory(notepadFile.getLongFileName())) {
 			vector<generic_string> fileNames;
 			vector<generic_string> patterns;
 			patterns.push_back(TEXT("*.*"));
 
-			generic_string fileNameStr = longFileName;
-			if (longFileName[lstrlen(longFileName) - 1] != '\\')
+			generic_string fileNameStr = notepadFile.getLongFileName();
+			if (notepadFile.getLongFileName()[lstrlen(notepadFile.getLongFileName()) - 1] != '\\')
 				fileNameStr += TEXT("\\");
 
 			getMatchedFileNames(fileNameStr.c_str(), patterns, fileNames, true, false);
@@ -207,7 +210,7 @@ BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
 		}
 		else {
 			generic_string msg = TEXT("Can not open file \"");
-			msg += longFileName;
+			msg += notepadFile.getLongFileName();
 			msg += TEXT("\".");
 			::MessageBox(getMainWindowHandle(), msg.c_str(), TEXT("ERROR"), MB_OK);
 

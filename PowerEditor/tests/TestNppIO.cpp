@@ -119,7 +119,7 @@ TEST(NPPIO, fileOpenADirectory)
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\dir").andReturnValue((int) true);
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\dir").andReturnValue((int) true);
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\dir").ignoreOtherParameters().andReturnValue(BUFFER_INVALID);
-	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "dir").ignoreOtherParameters().andReturnValue((int)true);
+	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "c:\\dir").ignoreOtherParameters().andReturnValue((int)true);
 	mock().expectOneCall("FindFirstFileA").ignoreOtherParameters();
 
 	notepad.doOpen("dir", false, 10);
