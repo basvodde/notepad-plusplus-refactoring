@@ -66,18 +66,39 @@ private:
 
 };
 
+NotepadFile::NotepadFile(const TCHAR* filename, int encoding)
+	: _originalFileName(filename), _encoding(encoding)
+{
+}
+
+const TCHAR* NotepadFile::getOriginalFileName()
+{
+	return _originalFileName;
+}
+
+int NotepadFile::getEncoding()
+{
+	return _encoding;
+}
+
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
+	NotepadFile notepadFile(fileName, encoding);
+	return doOpen(notepadFile, isReadOnly);
+}
+
+BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
+{
 	TCHAR longFileName[MAX_PATH];
-	::GetFullPathName(fileName, MAX_PATH, longFileName, NULL);
+	::GetFullPathName(notepadFile.getOriginalFileName(), MAX_PATH, longFileName, NULL);
 	::GetLongPathName(longFileName, longFileName, MAX_PATH);
 
 	_lastRecentFileList.remove(longFileName);
 
-	generic_string gs_fileName = fileName;
+	generic_string gs_fileName = notepadFile.getOriginalFileName();
 	size_t res = gs_fileName.find_first_of(UNTITLED_STR);
 	 
-	const TCHAR * fileName2Find = (res == 0) ? fileName : longFileName;
+	const TCHAR * fileName2Find = (res == 0) ? notepadFile.getOriginalFileName() : longFileName;
 	BufferID test = MainFileManager->getBufferFromName(fileName2Find);
 	if (test != BUFFER_INVALID) {
 		//switchToFile(test);
@@ -124,6 +145,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	scnN.nmhdr.idFrom = NULL;
 	_pluginsManager.notify(&scnN);
 
+	int encoding = notepadFile.getEncoding();
 	if (encoding == -1)
 		encoding = getHtmlXmlEncoding(longFileName);
 	
@@ -153,13 +175,13 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 			_pFileSwitcherPanel->newItem((int)buf, currentView());
 	}
 	else {
-		if (::PathIsDirectory(fileName)) {
+		if (::PathIsDirectory(longFileName)) {
 			vector<generic_string> fileNames;
 			vector<generic_string> patterns;
 			patterns.push_back(TEXT("*.*"));
 
-			generic_string fileNameStr = fileName;
-			if (fileName[lstrlen(fileName) - 1] != '\\')
+			generic_string fileNameStr = longFileName;
+			if (longFileName[lstrlen(longFileName) - 1] != '\\')
 				fileNameStr += TEXT("\\");
 
 			getMatchedFileNames(fileNameStr.c_str(), patterns, fileNames, true, false);
@@ -195,6 +217,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	}
 	return buffer;
 }
+
 
 bool Notepad_plus::doReload(BufferID id, bool alert)
 {
