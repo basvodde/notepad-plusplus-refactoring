@@ -196,6 +196,8 @@ public:
 	const TCHAR* getOriginalFileName();
 	const TCHAR* getLongFileName();
 
+	bool exists();
+
 	int getEncoding();
 private:
 	TCHAR _longFileName[MAX_PATH];

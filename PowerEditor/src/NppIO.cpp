@@ -83,6 +83,11 @@ const TCHAR* NotepadFile::getLongFileName()
 	return _longFileName;
 }
 
+bool NotepadFile::exists()
+{
+	return PathFileExists(_longFileName);
+}
+
 int NotepadFile::getEncoding()
 {
 	return _encoding;
@@ -110,16 +115,16 @@ BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
 		return test;
 	}
 
-	if (isFileSession(notepadFile.getLongFileName()) && PathFileExists(notepadFile.getLongFileName())) {
+	if (isFileSession(notepadFile.getLongFileName()) && notepadFile.exists()) {
 		fileLoadSession(notepadFile.getLongFileName());
 		return BUFFER_INVALID;
 	}
 
 	TemporaryWow64FsRedirectionSwitch wow64FsRedirectionSwitch;
-	if (!PathFileExists(notepadFile.getLongFileName()))
+	if (!notepadFile.exists())
 		wow64FsRedirectionSwitch.switchOff();
 
-	if (!PathFileExists(notepadFile.getLongFileName())) {
+	if (!notepadFile.exists()) {
 		TCHAR str2display[MAX_PATH*2];
 		generic_string longFileDir(notepadFile.getLongFileName());
 		PathRemoveFileSpec(longFileDir);
