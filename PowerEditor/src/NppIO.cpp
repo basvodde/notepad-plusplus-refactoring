@@ -96,24 +96,22 @@ int NotepadFile::getEncoding()
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
 	NotepadFile notepadFile(fileName, encoding);
-	return doOpen(notepadFile, isReadOnly);
-}
 
-BufferID Notepad_plus::doOpen(NotepadFile& notepadFile,  bool isReadOnly)
-{
-	_lastRecentFileList.remove(notepadFile.getLongFileName());
-
-	generic_string gs_fileName = notepadFile.getOriginalFileName();
-	size_t res = gs_fileName.find_first_of(UNTITLED_STR);
-	 
-	const TCHAR * fileName2Find = (res == 0) ? notepadFile.getOriginalFileName() : notepadFile.getLongFileName();
-	BufferID test = MainFileManager->getBufferFromName(fileName2Find);
+	size_t res = generic_string(fileName).find_first_of(UNTITLED_STR);
+	BufferID test = MainFileManager->getBufferFromName((res == 0) ? fileName : notepadFile.getLongFileName());
 	if (test != BUFFER_INVALID) {
 		//switchToFile(test);
 		//Dont switch, not responsibility of doOpen, but of caller
 		updateTray();
 		return test;
 	}
+
+	return openFileThatIsntOpenedYet(notepadFile, isReadOnly);
+}
+
+BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool isReadOnly)
+{
+	_lastRecentFileList.remove(notepadFile.getLongFileName());
 
 	if (isFileSession(notepadFile.getLongFileName()) && notepadFile.exists()) {
 		fileLoadSession(notepadFile.getLongFileName());
