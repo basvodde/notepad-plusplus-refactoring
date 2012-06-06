@@ -125,6 +125,11 @@ NotepadFile NotepadFile::getDirectoryPart()
 	return NotepadFile(longFileDir.c_str(), -1);
 }
 
+bool NotepadFile::isDirectory()
+{
+	return ::PathIsDirectory(_longFileName);
+}
+
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
 	NotepadFile notepadFile(fileName, encoding);
@@ -207,7 +212,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 			_pFileSwitcherPanel->newItem((int)buf, currentView());
 	}
 	else {
-		if (::PathIsDirectory(notepadFile.getLongFileName())) {
+		if (notepadFile.isDirectory()) {
 			vector<generic_string> fileNames;
 			vector<generic_string> patterns;
 			patterns.push_back(TEXT("*.*"));
@@ -232,9 +237,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 
 			if (ok2Open) {
 				for (size_t i = 0 ; i < nbFiles2Open ; i++)
-				{
 					doOpen(fileNames[i].c_str());
-				}
 			}
 		}
 		else {

@@ -198,6 +198,7 @@ public:
 
 	bool isFileSession();
 	bool exists();
+	bool isDirectory();
 
 	NotepadFile getDirectoryPart();
 
