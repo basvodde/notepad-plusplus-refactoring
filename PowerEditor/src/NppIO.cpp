@@ -32,6 +32,17 @@
 #include "EncodingMapper.h"
 #include "VerticalFileSwitcher.h"
 
+void Notepad_plus::updateTray()
+{
+	if (_pTrayIco) {
+		if (_pTrayIco->isInTray()) {
+			::ShowWindow(getMainWindowHandle(), SW_SHOW);
+			if (!_pPublicInterface->isPrelaunch())
+				_pTrayIco->doTrayIcon(REMOVE);
+			::SendMessage(getMainWindowHandle(), WM_SIZE, 0, 0);
+		}
+	}
+}
 
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
@@ -56,14 +67,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	if (test != BUFFER_INVALID) {
 		//switchToFile(test);
 		//Dont switch, not responsibility of doOpen, but of caller
-		if (_pTrayIco) {
-			if (_pTrayIco->isInTray()) {
-				::ShowWindow(getMainWindowHandle(), SW_SHOW);
-				if (!_pPublicInterface->isPrelaunch())
-					_pTrayIco->doTrayIcon(REMOVE);
-				::SendMessage(getMainWindowHandle(), WM_SIZE, 0, 0);
-			}
-		}
+		updateTray();
 		return test;
 	}
 
@@ -135,14 +139,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 
 		loadBufferIntoView(buffer, currentView());
 
-		if (_pTrayIco) {
-			if (_pTrayIco->isInTray()) {
-				::ShowWindow(getMainWindowHandle(), SW_SHOW);
-				if (!_pPublicInterface->isPrelaunch())
-					_pTrayIco->doTrayIcon(REMOVE);
-				::SendMessage(getMainWindowHandle(), WM_SIZE, 0, 0);
-			}
-		}
+		updateTray();
 		PathRemoveFileSpec(longFileName);
 		_linkTriggered = true;
 		_isDocModifing = false;

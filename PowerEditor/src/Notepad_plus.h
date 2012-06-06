@@ -293,6 +293,8 @@ public:
 	bool emergency(generic_string emergencySavedDir);
 
 	virtual HWND getMainWindowHandle();
+
+	void updateTray();
 protected:
 	Notepad_plus_Window *_pPublicInterface;
     Window *_pMainWindow;
