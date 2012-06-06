@@ -66,6 +66,7 @@ TEST(NPPIO, NormalFileToBeOpened)
 	exceptShortAndLongFilenames("file.session", "c:\\sessions\\file.session");
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
+	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "c:\\sessions\\file.session").ignoreOtherParameters().andReturnValue((int)false);
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
 
@@ -105,6 +106,7 @@ TEST(NPPIO, fileCreateNewFile)
 	mock().expectOneCall("GetLongPathNameA").ignoreOtherParameters();
 	mock().expectOneCall("MessageBoxA").ignoreOtherParameters().andReturnValue(IDYES);
 	mock().expectOneCall("FileManager::createEmptyFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
+	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "c:\\sessions\\file.session").ignoreOtherParameters().andReturnValue((int)false);
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
 
@@ -120,7 +122,6 @@ TEST(NPPIO, fileOpenADirectory)
 	exceptShortAndLongFilenames("dir", "c:\\dir");
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\dir").andReturnValue((int) true);
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\dir").andReturnValue((int) true);
-	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\dir").ignoreOtherParameters().andReturnValue(BUFFER_INVALID);
 	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "c:\\dir").ignoreOtherParameters().andReturnValue((int)true);
 	mock().expectOneCall("FindFirstFileA").ignoreOtherParameters();
 

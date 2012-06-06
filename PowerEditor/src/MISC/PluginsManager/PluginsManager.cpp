@@ -416,6 +416,12 @@ void PluginsManager::runPluginCommand(const TCHAR *pluginName, int commandID)
 	}
 }
 
+void PluginsManager::notify(const NotepadNotification& notification)
+{
+	SCNotification nativeNotification = ((NotepadNotification&)notification).getNotification();
+	notify(&nativeNotification);
+}
+
 void PluginsManager::notify(SCNotification *notification)
 {
 	for (size_t i = 0 ; i < _pluginInfos.size() ; i++)

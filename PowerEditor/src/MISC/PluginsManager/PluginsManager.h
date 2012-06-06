@@ -47,6 +47,49 @@
 
 typedef BOOL (__cdecl * PFUNCISUNICODE)();
 
+class NotepadNotification
+{
+public:
+	NotepadNotification(unsigned int code) {
+		notification.nmhdr.code = code;
+		notification.nmhdr.idFrom = NULL;
+	}
+
+	SCNotification getNotification()
+	{
+		return notification;
+	}
+
+protected:
+	SCNotification notification;
+};
+
+class BeforeFileLoadNoticiation : public NotepadNotification
+{
+public:
+	BeforeFileLoadNoticiation(HWND handle, BufferID bufferID = NULL) : NotepadNotification(NPPN_FILEBEFORELOAD) {
+		notification.nmhdr.hwndFrom = handle;
+		notification.nmhdr.hwndFrom = (HWND) bufferID;
+	}
+};
+
+class FileJustBeenOpenedNotification : public NotepadNotification
+{
+public:
+	FileJustBeenOpenedNotification(HWND handle, BufferID bufferID = NULL) : NotepadNotification(NPPN_FILEOPENED) {
+		notification.nmhdr.hwndFrom = handle;
+		notification.nmhdr.hwndFrom = (HWND) bufferID;
+	}
+};
+
+class LoadingFileFailedNotification : public NotepadNotification
+{
+public:
+	LoadingFileFailedNotification(HWND handle)  : NotepadNotification(NPPN_FILELOADFAILED) {
+		notification.nmhdr.hwndFrom = handle;
+	}
+};
+
 struct PluginCommand {
 	generic_string _pluginName;
 	int _funcID;
@@ -110,6 +153,7 @@ public:
 	bool getShortcutByCmdID(int cmdID, ShortcutKey *sk);
 
 	void notify(SCNotification *notification);
+	void notify(const NotepadNotification& notification);
 	void relayNppMessages(UINT Message, WPARAM wParam, LPARAM lParam);
 	bool relayPluginMessages(UINT Message, WPARAM wParam, LPARAM lParam);
 

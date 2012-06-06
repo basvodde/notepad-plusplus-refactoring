@@ -174,13 +174,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		}
 	}
 
-	// Notify plugins that current file is about to load
-	// Plugins can should use this notification to filter SCN_MODIFIED
-	SCNotification scnN;
-	scnN.nmhdr.code = NPPN_FILEBEFORELOAD;
-	scnN.nmhdr.hwndFrom = getMainWindowHandle();
-	scnN.nmhdr.idFrom = NULL;
-	_pluginsManager.notify(&scnN);
+	_pluginsManager.notify(BeforeFileLoadNoticiation(getMainWindowHandle()));
 
 	int encoding = notepadFile.getEncoding();
 	if (encoding == -1)
@@ -225,19 +219,14 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		if (isReadOnly)
 			buf->setUserReadOnly(true);
 
-		// Notify plugins that current file is about to open
-		scnN.nmhdr.code = NPPN_FILEBEFOREOPEN;
-		scnN.nmhdr.idFrom = (uptr_t)buffer;
-		_pluginsManager.notify(&scnN);
+		_pluginsManager.notify(BeforeFileLoadNoticiation(getMainWindowHandle(), buffer));
 		
 		loadBufferIntoView(buffer, currentView());
 		updateTray();
 		_linkTriggered = true;
 		_isDocModifing = false;
 
-		// Notify plugins that current file is just opened
-		scnN.nmhdr.code = NPPN_FILEOPENED;
-		_pluginsManager.notify(&scnN);
+		_pluginsManager.notify(FileJustBeenOpenedNotification(getMainWindowHandle(), buffer));
 		if (_pFileSwitcherPanel)
 			_pFileSwitcherPanel->newItem((int)buf, currentView());
 	}
@@ -247,8 +236,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		msg += TEXT("\".");
 		::MessageBox(getMainWindowHandle(), msg.c_str(), TEXT("ERROR"), MB_OK);
 
-		scnN.nmhdr.code = NPPN_FILELOADFAILED;
-		_pluginsManager.notify(&scnN);
+		_pluginsManager.notify(LoadingFileFailedNotification(getMainWindowHandle()));
 	}
 	return buffer;
 }
