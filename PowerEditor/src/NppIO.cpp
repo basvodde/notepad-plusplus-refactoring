@@ -186,6 +186,36 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 	if (encoding == -1)
 		encoding = getHtmlXmlEncoding(notepadFile.getLongFileName());
 	
+	if (notepadFile.isDirectory()) {
+		vector<generic_string> fileNames;
+		vector<generic_string> patterns;
+		patterns.push_back(TEXT("*.*"));
+
+		generic_string fileNameStr = notepadFile.getLongFileName();
+		if (notepadFile.getLongFileName()[lstrlen(notepadFile.getLongFileName()) - 1] != '\\')
+			fileNameStr += TEXT("\\");
+
+		getMatchedFileNames(fileNameStr.c_str(), patterns, fileNames, true, false);
+		size_t nbFiles2Open = fileNames.size();
+
+		bool ok2Open = true;
+		if (nbFiles2Open > 200) {
+			int answer = _nativeLangSpeaker.messageBox("NbFileToOpenImportantWarning",
+											getMainWindowHandle(),
+											TEXT("$INT_REPLACE$ files are about to be opened.\rAre you sure to open them?"),
+											TEXT("Amount of files to open is too large"),
+											MB_YESNO|MB_APPLMODAL,
+											nbFiles2Open);
+			ok2Open = answer == IDYES;
+		}
+
+		if (ok2Open) {
+			for (size_t i = 0 ; i < nbFiles2Open ; i++)
+				doOpen(fileNames[i].c_str());
+		}
+		return BUFFER_INVALID;
+	}
+
 	BufferID buffer = MainFileManager->loadFile(notepadFile.getLongFileName(), NULL, encoding);
 
 	if (buffer != BUFFER_INVALID) {
@@ -212,43 +242,13 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 			_pFileSwitcherPanel->newItem((int)buf, currentView());
 	}
 	else {
-		if (notepadFile.isDirectory()) {
-			vector<generic_string> fileNames;
-			vector<generic_string> patterns;
-			patterns.push_back(TEXT("*.*"));
+		generic_string msg = TEXT("Can not open file \"");
+		msg += notepadFile.getLongFileName();
+		msg += TEXT("\".");
+		::MessageBox(getMainWindowHandle(), msg.c_str(), TEXT("ERROR"), MB_OK);
 
-			generic_string fileNameStr = notepadFile.getLongFileName();
-			if (notepadFile.getLongFileName()[lstrlen(notepadFile.getLongFileName()) - 1] != '\\')
-				fileNameStr += TEXT("\\");
-
-			getMatchedFileNames(fileNameStr.c_str(), patterns, fileNames, true, false);
-			size_t nbFiles2Open = fileNames.size();
-
-			bool ok2Open = true;
-			if (nbFiles2Open > 200) {
-				int answer = _nativeLangSpeaker.messageBox("NbFileToOpenImportantWarning",
-												getMainWindowHandle(),
-												TEXT("$INT_REPLACE$ files are about to be opened.\rAre you sure to open them?"),
-												TEXT("Amount of files to open is too large"),
-												MB_YESNO|MB_APPLMODAL,
-												nbFiles2Open);
-				ok2Open = answer == IDYES;
-			}
-
-			if (ok2Open) {
-				for (size_t i = 0 ; i < nbFiles2Open ; i++)
-					doOpen(fileNames[i].c_str());
-			}
-		}
-		else {
-			generic_string msg = TEXT("Can not open file \"");
-			msg += notepadFile.getLongFileName();
-			msg += TEXT("\".");
-			::MessageBox(getMainWindowHandle(), msg.c_str(), TEXT("ERROR"), MB_OK);
-
-			scnN.nmhdr.code = NPPN_FILELOADFAILED;
-			_pluginsManager.notify(&scnN);
-		}
+		scnN.nmhdr.code = NPPN_FILELOADFAILED;
+		_pluginsManager.notify(&scnN);
 	}
 	return buffer;
 }
