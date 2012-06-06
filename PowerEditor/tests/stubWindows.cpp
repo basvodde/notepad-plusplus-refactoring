@@ -61,9 +61,13 @@ BOOL WINAPI PathMatchSpecA(LPCSTR,LPCSTR)
 	return FALSE;
 }
 
-BOOL WINAPI PathIsDirectoryA(LPCSTR)
+BOOL WINAPI PathIsDirectoryA(LPCSTR path)
 {
-	FAIL("PathIsDirectoryA");
+	mock().actualCall("PathIsDirectoryA").withParameter("path", path);
+
+	if (mock().hasReturnValue())
+		return (bool) mock().returnValue().getIntValue();
+
 	return FALSE;
 }
 
@@ -489,9 +493,13 @@ BOOL WINAPI GetSaveFileNameA(LPOPENFILENAMEA)
 
 // winuser
 
-WINUSERAPI int WINAPI MessageBoxA(HWND,LPCSTR,LPCSTR,UINT)
+WINUSERAPI int WINAPI MessageBoxA(HWND wnd,LPCSTR message,LPCSTR title,UINT type)
 {
-	FAIL("MessageBoxA");
+	mock().actualCall("MessageBoxA").withParameter("wnd", wnd).withParameter("message", message).withParameter("title", title).withParameter("type", (int)type);
+
+	if (mock().hasReturnValue())
+		return mock().returnValue().getIntValue();
+
 	return 0;
 }
 
@@ -521,4 +529,10 @@ DWORD WINAPI GetLongPathNameA(LPCSTR lpszShortPath,LPSTR lpszLongPath,DWORD cchB
 	}
 
 	return 0;
+}
+
+HANDLE WINAPI FindFirstFileA(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
+{
+	mock().actualCall("FindFirstFileA").withParameter("lpFileName", lpFileName).withParameter("lpFindFileData", lpFindFileData);
+	return INVALID_HANDLE_VALUE;
 }

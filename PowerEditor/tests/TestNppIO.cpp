@@ -22,71 +22,68 @@ class MockedFileManager : public FileManager
 	virtual BufferID loadFile(const TCHAR * filename, Document doc = NULL, int encoding = -1)
 	{
 		mock().actualCall("FileManager::loadFile").withParameter("filename", filename).withParameter("Document", &doc).withParameter("encoding", encoding);
-		return (Buffer*) 0xcdcdcdcd;
+		if (mock().hasReturnValue())
+			return (BufferID) mock().returnValue().getPointerValue();
+
+		return (BufferID) 0xcdcdcdcd;
+	}
+
+	virtual bool createEmptyFile(const TCHAR * filename)
+	{
+		mock().actualCall("FileManager::createEmptyFile").withParameter("filename", filename);
+		return true;
 	}
 };
 
 TEST_GROUP(NPPIO)
 {
+	MockedFileManager mockedFileManager;
+	FileManager* originalFileManager;
+
 	void setup()
 	{
-//		if (NppParameters::getInstance())
-//			NppParameters::getInstance()->destroyInstance();
-//
-//		mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
-//		mock().expectOneCall("PathFileExistsA").ignoreOtherParameters();
-//		NppParameters::setInstance(new NppParameters());
-
+		originalFileManager = FileManager::setInstance(&mockedFileManager);
 	}
 
 	void teardown()
 	{
-//		NppParameters::getInstance()->destroyInstance();
-//		NppParameters::setInstance(NULL);
+		FileManager::setInstance(originalFileManager);
 	}
 };
 
+void exceptShortAndLongFilenames(const char* shortFilename, const char* longFilename)
+{
+	mock().setData("GetFullPathNameA_filename", longFilename);
+	mock().setData("GetLongPathNameA_filename", longFilename);
+	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", shortFilename).ignoreOtherParameters();
+	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", longFilename).ignoreOtherParameters();
+	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", longFilename).ignoreOtherParameters();
+	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", longFilename).ignoreOtherParameters();
+}
+
 TEST(NPPIO, NormalFileToBeOpened)
 {
-	MockedFileManager mockedFileManager;
+	Notepad_plus_for_test notepad;
 
-	FileManager* originalFileManager = FileManager::setInstance(&mockedFileManager);
-
-	mock().setData("GetFullPathNameA_filename", "c:\\sessions\\file.session");
-	mock().setData("GetLongPathNameA_filename", "c:\\sessions\\file.session");
-	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", "file.session").ignoreOtherParameters();
-	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", "c:\\sessions\\file.session").ignoreOtherParameters();
-	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", "c:\\sessions\\file.session").ignoreOtherParameters();
-	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", "c:\\sessions\\file.session").ignoreOtherParameters();
+	exceptShortAndLongFilenames("file.session", "c:\\sessions\\file.session");
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
 	mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
 
-	Notepad_plus_for_test notepad;
 	notepad.doOpen("file.session", false, 10);
 
-	FileManager::setInstance(originalFileManager);
 	mock().expectNCalls(DOCKCONT_MAX, "DeleteObject").ignoreOtherParameters();
-	mock().expectNCalls(2, "DeleteObject").ignoreOtherParameters();
 }
 
 TEST(NPPIO, fileToBeOpenedIsASessionFile)
 {
-	MockedFileManager mockedFileManager;
-
-	FileManager* originalFileManager = FileManager::setInstance(&mockedFileManager);
-
 	string oldSessionExtension = NppParameters::getInstance()->getNppGUI()._definedSessionExt;
 	((NppGUI &)NppParameters::getInstance()->getNppGUI())._definedSessionExt = ".session";
 
-	mock().setData("GetFullPathNameA_filename", "c:\\sessions\\file.session");
-	mock().setData("GetLongPathNameA_filename", "c:\\sessions\\file.session");
-	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", "file.session").ignoreOtherParameters();
-	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", "c:\\sessions\\file.session").ignoreOtherParameters();
-	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", "c:\\sessions\\file.session").ignoreOtherParameters();
-	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", "c:\\sessions\\file.session").ignoreOtherParameters();
+	exceptShortAndLongFilenames("file.session", "c:\\sessions\\file.session");
+
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
 	mock().expectOneCall("PathFindExtension").withParameter("filename", "c:\\sessions\\file.session").andReturnValue(".session");
@@ -94,7 +91,6 @@ TEST(NPPIO, fileToBeOpenedIsASessionFile)
 	Notepad_plus_for_test notepad;
 	notepad.doOpen("file.session", false, 10);
 
-	FileManager::setInstance(originalFileManager);
 	mock().expectNCalls(DOCKCONT_MAX, "DeleteObject").ignoreOtherParameters();
 	((NppGUI &)NppParameters::getInstance()->getNppGUI())._definedSessionExt = oldSessionExtension;
 }
@@ -102,9 +98,39 @@ TEST(NPPIO, fileToBeOpenedIsASessionFile)
 
 TEST(NPPIO, fileCreateNewFile)
 {
-}
+	Notepad_plus_for_test notepad;
 
+	exceptShortAndLongFilenames("file.session", "c:\\sessions\\file.session");
+	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) false);
+	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) false);
+	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions").andReturnValue((int) true);
+	mock().expectOneCall("MessageBoxA").ignoreOtherParameters().andReturnValue(IDYES);
+	mock().expectOneCall("FileManager::createEmptyFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
+	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
+	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
+	mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
+
+	notepad.doOpen("file.session", false, 10);
+
+	mock().expectNCalls(DOCKCONT_MAX, "DeleteObject").ignoreOtherParameters();
+}
 
 TEST(NPPIO, fileOpenADirectory)
 {
+	Notepad_plus_for_test notepad;
+
+	exceptShortAndLongFilenames("dir", "c:\\dir");
+	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\dir").andReturnValue((int) true);
+	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\dir").andReturnValue((int) true);
+	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\dir").ignoreOtherParameters().andReturnValue(BUFFER_INVALID);
+	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "dir").ignoreOtherParameters().andReturnValue((int)true);
+	mock().expectOneCall("FindFirstFileA").ignoreOtherParameters();
+
+//	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
+//	mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
+
+	notepad.doOpen("dir", false, 10);
+
+	mock().expectNCalls(DOCKCONT_MAX, "DeleteObject").ignoreOtherParameters();
+
 }

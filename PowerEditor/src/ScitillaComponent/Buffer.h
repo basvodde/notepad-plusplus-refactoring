@@ -105,7 +105,7 @@ public:
 	bool deleteFile(BufferID id);
 	bool moveFile(BufferID id, const TCHAR * newFilename);
 
-	bool createEmptyFile(const TCHAR * path);
+	virtual bool createEmptyFile(const TCHAR * path);
 
 	static FileManager * getInstance() {return _pSelf;};
 	static FileManager * setInstance(FileManager* newSelf) {
