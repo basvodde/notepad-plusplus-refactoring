@@ -199,6 +199,8 @@ public:
 	bool isFileSession();
 	bool exists();
 
+	NotepadFile getDirectoryPart();
+
 	int getEncoding();
 private:
 	TCHAR _longFileName[MAX_PATH];

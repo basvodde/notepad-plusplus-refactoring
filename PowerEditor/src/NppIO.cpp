@@ -117,6 +117,14 @@ bool NotepadFile::isFileSession() {
 	return false;
 }
 
+NotepadFile NotepadFile::getDirectoryPart()
+{
+	TCHAR str2display[MAX_PATH*2];
+	generic_string longFileDir(_longFileName);
+	PathRemoveFileSpec(longFileDir);
+	return NotepadFile(longFileDir.c_str(), -1);
+}
+
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
 	NotepadFile notepadFile(fileName, encoding);
@@ -137,7 +145,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 {
 	_lastRecentFileList.remove(notepadFile.getLongFileName());
 
-	if (notepadFile.exists() && notepadFile.isFileSession()) {
+	if (notepadFile.isFileSession() && notepadFile.exists()) {
 		fileLoadSession(notepadFile.getLongFileName());
 		return BUFFER_INVALID;
 	}
@@ -147,24 +155,18 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		wow64FsRedirectionSwitch.switchOff();
 
 	if (!notepadFile.exists()) {
-		TCHAR str2display[MAX_PATH*2];
-		generic_string longFileDir(notepadFile.getLongFileName());
-		PathRemoveFileSpec(longFileDir);
-
-		bool isCreateFileSuccessful = false;
-		if (PathFileExists(longFileDir.c_str())) {
+		NotepadFile baseDirectory = notepadFile.getDirectoryPart();
+		if (baseDirectory.exists()) {
+			TCHAR str2display[MAX_PATH*2];
 			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), notepadFile.getLongFileName());
 			if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
-				if (MainFileManager->createEmptyFile(notepadFile.getLongFileName()))
-					isCreateFileSuccessful = true;
-				else {
+				if (!MainFileManager->createEmptyFile(notepadFile.getLongFileName())) {
 					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), notepadFile.getLongFileName());
 					::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
+					return BUFFER_INVALID;
 				}
 			}
 		}
-		if (!isCreateFileSuccessful)
-			return BUFFER_INVALID;
 	}
 
 	// Notify plugins that current file is about to load
@@ -961,7 +963,7 @@ bool Notepad_plus::loadSession(Session & session)
 	for ( ; i < session.nbMainFiles() ; )
 	{
 		const TCHAR *pFn = session._mainViewFiles[i]._fileName.c_str();
-		if (NotepadFile(pFn).isFileSession())
+		if (NotepadFile(pFn, -1).isFileSession())
 		{
 			vector<sessionFileInfo>::iterator posIt = session._mainViewFiles.begin() + i;
 			session._mainViewFiles.erase(posIt);
@@ -1030,7 +1032,7 @@ bool Notepad_plus::loadSession(Session & session)
 	for ( ; k < session.nbSubFiles() ; )
 	{
 		const TCHAR *pFn = session._subViewFiles[k]._fileName.c_str();
-		if (NotepadFile(pFn).isFileSession()) {
+		if (NotepadFile(pFn, -1).isFileSession()) {
 			vector<sessionFileInfo>::iterator posIt = session._subViewFiles.begin() + k;
 			session._subViewFiles.erase(posIt);
 			continue;	//skip session files, not supporting recursive sessions

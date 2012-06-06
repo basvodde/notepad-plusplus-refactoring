@@ -100,7 +100,9 @@ TEST(NPPIO, fileCreateNewFile)
 	exceptShortAndLongFilenames("file.session", "c:\\sessions\\file.session");
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) false);
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) false);
-	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions").andReturnValue((int) true);
+	mock().expectOneCall("PathFileExistsA").ignoreOtherParameters().andReturnValue((int) true);
+	mock().expectOneCall("GetFullPathNameA").ignoreOtherParameters();
+	mock().expectOneCall("GetLongPathNameA").ignoreOtherParameters();
 	mock().expectOneCall("MessageBoxA").ignoreOtherParameters().andReturnValue(IDYES);
 	mock().expectOneCall("FileManager::createEmptyFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
