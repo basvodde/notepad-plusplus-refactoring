@@ -196,6 +196,7 @@ public:
 	const TCHAR* getOriginalFileName();
 	const TCHAR* getLongFileName();
 
+	bool isFileSession();
 	bool exists();
 
 	int getEncoding();
@@ -260,7 +261,6 @@ public:
 	bool switchToFile(BufferID buffer);			//find buffer in active view then in other view.
 // end fileOperations
 
-	bool isFileSession(const TCHAR * filename);
 	void filePrint(bool showDialog);
 	bool saveScintillaParams();
 

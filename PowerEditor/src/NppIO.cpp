@@ -93,6 +93,30 @@ int NotepadFile::getEncoding()
 	return _encoding;
 }
 
+bool NotepadFile::isFileSession() {
+
+	// if file2open matches the ext of user defined session file ext, then it'll be opened as a session
+	const TCHAR *definedSessionExt = NppParameters::getInstance()->getNppGUI()._definedSessionExt.c_str();
+	if (*definedSessionExt != '\0')
+	{
+		generic_string fncp = _longFileName;
+		TCHAR *pExt = PathFindExtension(fncp.c_str());
+
+		generic_string usrSessionExt = TEXT("");
+		if (*definedSessionExt != '.')
+		{
+			usrSessionExt += TEXT(".");
+		}
+		usrSessionExt += definedSessionExt;
+
+		if (!generic_stricmp(pExt, usrSessionExt.c_str()))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
 	NotepadFile notepadFile(fileName, encoding);
@@ -113,7 +137,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 {
 	_lastRecentFileList.remove(notepadFile.getLongFileName());
 
-	if (isFileSession(notepadFile.getLongFileName()) && notepadFile.exists()) {
+	if (notepadFile.exists() && notepadFile.isFileSession()) {
 		fileLoadSession(notepadFile.getLongFileName());
 		return BUFFER_INVALID;
 	}
@@ -924,30 +948,6 @@ void Notepad_plus::fileNew()
     activateBuffer(newBufID, currentView());
 }
 
-bool Notepad_plus::isFileSession(const TCHAR * filename) {
-	// if file2open matches the ext of user defined session file ext, then it'll be opened as a session
-	const TCHAR *definedSessionExt = NppParameters::getInstance()->getNppGUI()._definedSessionExt.c_str();
-	if (*definedSessionExt != '\0')
-	{
-		generic_string fncp = filename;
-		TCHAR *pExt = PathFindExtension(fncp.c_str());
-
-		generic_string usrSessionExt = TEXT("");
-		if (*definedSessionExt != '.')
-		{
-			usrSessionExt += TEXT(".");
-		}
-		usrSessionExt += definedSessionExt;
-
-		if (!generic_stricmp(pExt, usrSessionExt.c_str()))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-
 // return true if all the session files are loaded
 // return false if one or more sessions files fail to load (and session is modify to remove invalid files)
 bool Notepad_plus::loadSession(Session & session)
@@ -961,7 +961,7 @@ bool Notepad_plus::loadSession(Session & session)
 	for ( ; i < session.nbMainFiles() ; )
 	{
 		const TCHAR *pFn = session._mainViewFiles[i]._fileName.c_str();
-		if (isFileSession(pFn))
+		if (NotepadFile(pFn).isFileSession())
 		{
 			vector<sessionFileInfo>::iterator posIt = session._mainViewFiles.begin() + i;
 			session._mainViewFiles.erase(posIt);
@@ -1030,7 +1030,7 @@ bool Notepad_plus::loadSession(Session & session)
 	for ( ; k < session.nbSubFiles() ; )
 	{
 		const TCHAR *pFn = session._subViewFiles[k]._fileName.c_str();
-		if (isFileSession(pFn)) {
+		if (NotepadFile(pFn).isFileSession()) {
 			vector<sessionFileInfo>::iterator posIt = session._subViewFiles.begin() + k;
 			session._subViewFiles.erase(posIt);
 			continue;	//skip session files, not supporting recursive sessions
