@@ -57,8 +57,6 @@ void exceptShortAndLongFilenames(const char* shortFilename, const char* longFile
 	mock().setData("GetLongPathNameA_filename", longFilename);
 	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", shortFilename).ignoreOtherParameters();
 	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", longFilename).ignoreOtherParameters();
-	mock().expectOneCall("GetFullPathNameA").withParameter("lpFileName", longFilename).ignoreOtherParameters();
-	mock().expectOneCall("GetLongPathNameA").withParameter("lpszShortPath", longFilename).ignoreOtherParameters();
 }
 
 TEST(NPPIO, NormalFileToBeOpened)
@@ -70,7 +68,6 @@ TEST(NPPIO, NormalFileToBeOpened)
 	mock().expectOneCall("PathFileExistsA").withParameter("filename", "c:\\sessions\\file.session").andReturnValue((int) true);
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
-	mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
 
 	notepad.doOpen("file.session", false, 10);
 
@@ -108,7 +105,6 @@ TEST(NPPIO, fileCreateNewFile)
 	mock().expectOneCall("FileManager::createEmptyFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\sessions\\file.session").ignoreOtherParameters();
 	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
-	mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
 
 	notepad.doOpen("file.session", false, 10);
 
@@ -125,9 +121,6 @@ TEST(NPPIO, fileOpenADirectory)
 	mock().expectOneCall("FileManager::loadFile").withParameter("filename", "c:\\dir").ignoreOtherParameters().andReturnValue(BUFFER_INVALID);
 	mock().expectOneCall("PathIsDirectoryA").withParameter("path", "dir").ignoreOtherParameters().andReturnValue((int)true);
 	mock().expectOneCall("FindFirstFileA").ignoreOtherParameters();
-
-//	mock().expectOneCall("Notepad_plus::loadBufferIntoView").ignoreOtherParameters();
-//	mock().expectOneCall("PathRemoveFileSpecA").ignoreOtherParameters();
 
 	notepad.doOpen("dir", false, 10);
 

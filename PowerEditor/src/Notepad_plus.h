@@ -404,8 +404,6 @@ protected:
 	PluginsManager _pluginsManager;
     ButtonDlg _restoreButton;
 
-	bool _isFileOpening;
-
 	ScintillaCtrls _scintillaCtrls4Plugins;
 
 	vector<pair<int, int> > _hideLinesMarks;

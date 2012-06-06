@@ -863,9 +863,6 @@ bool FileManager::loadFileData(Document doc, const TCHAR * filename, Utf8_16_Rea
 }
 
 BufferID FileManager::getBufferFromName(const TCHAR * name) {
-	TCHAR fullpath[MAX_PATH];
-	::GetFullPathName(name, MAX_PATH, fullpath, NULL);
-	::GetLongPathName(fullpath, fullpath, MAX_PATH);
 	for(size_t i = 0; i < _buffers.size(); i++) {
 		if (!lstrcmpi(name, _buffers.at(i)->getFullPathName()))
 			return _buffers.at(i)->getID();

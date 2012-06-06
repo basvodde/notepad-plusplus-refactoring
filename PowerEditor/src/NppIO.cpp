@@ -68,23 +68,16 @@ private:
 
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
-	NppParameters *pNppParam = NppParameters::getInstance();
 	TCHAR longFileName[MAX_PATH];
-
 	::GetFullPathName(fileName, MAX_PATH, longFileName, NULL);
 	::GetLongPathName(longFileName, longFileName, MAX_PATH);
 
 	_lastRecentFileList.remove(longFileName);
 
-	const TCHAR * fileName2Find;
 	generic_string gs_fileName = fileName;
 	size_t res = gs_fileName.find_first_of(UNTITLED_STR);
 	 
-	if (res != string::npos && res == 0)
-		fileName2Find = fileName;
-	else
-		fileName2Find = longFileName;
-
+	const TCHAR * fileName2Find = (res == 0) ? fileName : longFileName;
 	BufferID test = MainFileManager->getBufferFromName(fileName2Find);
 	if (test != BUFFER_INVALID) {
 		//switchToFile(test);
@@ -111,8 +104,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		if (PathFileExists(longFileDir.c_str())) {
 			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), longFileName);
 			if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
-				bool res = MainFileManager->createEmptyFile(longFileName);
-				if (res)
+				if (MainFileManager->createEmptyFile(longFileName))
 					isCreateFileSuccessful = true;
 				else {
 					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), longFileName);
@@ -120,10 +112,8 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 				}
 			}
 		}
-
-		if (!isCreateFileSuccessful) {
+		if (!isCreateFileSuccessful)
 			return BUFFER_INVALID;
-		}
 	}
 
 	// Notify plugins that current file is about to load
@@ -140,9 +130,8 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	BufferID buffer = MainFileManager->loadFile(longFileName, NULL, encoding);
 
 	if (buffer != BUFFER_INVALID) {
-		_isFileOpening = true;
-
 		Buffer * buf = MainFileManager->getBufferByID(buffer);
+
 		// if file is read only, we set the view read only
 		if (isReadOnly)
 			buf->setUserReadOnly(true);
@@ -152,15 +141,10 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		scnN.nmhdr.idFrom = (uptr_t)buffer;
 		_pluginsManager.notify(&scnN);
 		
-
 		loadBufferIntoView(buffer, currentView());
-
 		updateTray();
-		PathRemoveFileSpec(longFileName);
 		_linkTriggered = true;
 		_isDocModifing = false;
-		
-		_isFileOpening = false;
 
 		// Notify plugins that current file is just opened
 		scnN.nmhdr.code = NPPN_FILEOPENED;
@@ -204,7 +188,6 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 			msg += longFileName;
 			msg += TEXT("\".");
 			::MessageBox(getMainWindowHandle(), msg.c_str(), TEXT("ERROR"), MB_OK);
-			_isFileOpening = false;
 
 			scnN.nmhdr.code = NPPN_FILELOADFAILED;
 			_pluginsManager.notify(&scnN);
