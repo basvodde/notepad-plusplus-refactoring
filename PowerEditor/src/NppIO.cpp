@@ -44,6 +44,28 @@ void Notepad_plus::updateTray()
 	}
 }
 
+class TemporaryWow64FsRedirectionSwitch
+{
+public:
+	TemporaryWow64FsRedirectionSwitch() : _isWowFsRedirectionEnabled(true)
+	{
+	}
+
+	void switchOff()
+	{
+		NppParameters::getInstance()->safeWow64EnableWow64FsRedirection(FALSE);
+	}
+
+	~TemporaryWow64FsRedirectionSwitch()
+	{
+		if (!_isWowFsRedirectionEnabled)
+			NppParameters::getInstance()->safeWow64EnableWow64FsRedirection(TRUE);
+	}
+private:
+	bool _isWowFsRedirectionEnabled;
+
+};
+
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
 	NppParameters *pNppParam = NppParameters::getInstance();
@@ -76,11 +98,9 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		return BUFFER_INVALID;
 	}
 
-	bool isWow64Off = false;
-	if (!PathFileExists(longFileName)) {
-		pNppParam->safeWow64EnableWow64FsRedirection(FALSE);
-		isWow64Off = true;
-	}
+	TemporaryWow64FsRedirectionSwitch wow64FsRedirectionSwitch;
+	if (!PathFileExists(longFileName))
+		wow64FsRedirectionSwitch.switchOff();
 
 	if (!PathFileExists(longFileName)) {
 		TCHAR str2display[MAX_PATH*2];
@@ -102,10 +122,6 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 		}
 
 		if (!isCreateFileSuccessful) {
-			if (isWow64Off) {
-				pNppParam->safeWow64EnableWow64FsRedirection(TRUE);
-				isWow64Off = false;
-			}
 			return BUFFER_INVALID;
 		}
 	}
@@ -193,11 +209,6 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 			scnN.nmhdr.code = NPPN_FILELOADFAILED;
 			_pluginsManager.notify(&scnN);
 		}
-	}
-
-	if (isWow64Off) {
-		pNppParam->safeWow64EnableWow64FsRedirection(TRUE);
-		isWow64Off = false;
 	}
 	return buffer;
 }
