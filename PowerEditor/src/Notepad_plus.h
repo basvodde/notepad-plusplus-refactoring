@@ -206,6 +206,7 @@ public:
 
 	int getEncoding();
 	void setEncoding(int encoding);
+
 private:
 	TCHAR _longFileName[MAX_PATH];
 	int _encoding;
@@ -321,6 +322,7 @@ public:
 	virtual HWND getMainWindowHandle();
 
 	void updateTray();
+	bool createNewFile(NotepadFile notepadFile);
 protected:
 	Notepad_plus_Window *_pPublicInterface;
     Window *_pMainWindow;

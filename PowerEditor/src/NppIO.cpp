@@ -157,6 +157,23 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	return openFileThatIsntOpenedYet(notepadFile, isReadOnly);
 }
 
+bool Notepad_plus::createNewFile(NotepadFile notepadFile)
+{
+	if (!notepadFile.baseDirectoryExists())
+		return false;
+
+	TCHAR str2display[MAX_PATH*2];
+	wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), notepadFile.getLongFileName());
+	if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
+		if (!MainFileManager->createEmptyFile(notepadFile.getLongFileName())) {
+			wsprintf(str2display, TEXT("Cannot create the file \"%s\""), notepadFile.getLongFileName());
+			::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
+			return false;
+		}
+	}
+	return true;
+}
+
 BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool isReadOnly)
 {
 	_lastRecentFileList.remove(notepadFile.getLongFileName());
@@ -170,20 +187,9 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 	if (!notepadFile.exists())
 		wow64FsRedirectionSwitch.switchOff();
 
-	if (!notepadFile.exists()) {
-		if (!notepadFile.baseDirectoryExists())
+	if (!notepadFile.exists())
+		if (createNewFile(notepadFile))
 			return BUFFER_INVALID;
-
-		TCHAR str2display[MAX_PATH*2];
-		wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), notepadFile.getLongFileName());
-		if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
-			if (!MainFileManager->createEmptyFile(notepadFile.getLongFileName())) {
-				wsprintf(str2display, TEXT("Cannot create the file \"%s\""), notepadFile.getLongFileName());
-				::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
-				return BUFFER_INVALID;
-			}
-		}
-	}
 
 
 	if (notepadFile.isDirectory()) {
