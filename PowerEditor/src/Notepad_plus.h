@@ -200,6 +200,8 @@ public:
 	bool exists();
 	bool isDirectory();
 
+	bool baseDirectoryExists();
+
 	NotepadFile getDirectoryPart();
 
 	int getEncoding();

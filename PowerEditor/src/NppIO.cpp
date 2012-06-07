@@ -125,6 +125,11 @@ NotepadFile NotepadFile::getDirectoryPart()
 	return NotepadFile(longFileDir.c_str(), -1);
 }
 
+bool NotepadFile::baseDirectoryExists()
+{
+	getDirectoryPart().exists();
+}
+
 bool NotepadFile::isDirectory()
 {
 	return ::PathIsDirectory(_longFileName);
@@ -160,16 +165,16 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		wow64FsRedirectionSwitch.switchOff();
 
 	if (!notepadFile.exists()) {
-		NotepadFile baseDirectory = notepadFile.getDirectoryPart();
-		if (baseDirectory.exists()) {
-			TCHAR str2display[MAX_PATH*2];
-			wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), notepadFile.getLongFileName());
-			if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
-				if (!MainFileManager->createEmptyFile(notepadFile.getLongFileName())) {
-					wsprintf(str2display, TEXT("Cannot create the file \"%s\""), notepadFile.getLongFileName());
-					::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
-					return BUFFER_INVALID;
-				}
+		if (!notepadFile.baseDirectoryExists())
+			return BUFFER_INVALID;
+
+		TCHAR str2display[MAX_PATH*2];
+		wsprintf(str2display, TEXT("%s doesn't exist. Create it?"), notepadFile.getLongFileName());
+		if (::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_YESNO) == IDYES) {
+			if (!MainFileManager->createEmptyFile(notepadFile.getLongFileName())) {
+				wsprintf(str2display, TEXT("Cannot create the file \"%s\""), notepadFile.getLongFileName());
+				::MessageBox(getMainWindowHandle(), str2display, TEXT("Create new file"), MB_OK);
+				return BUFFER_INVALID;
 			}
 		}
 	}
@@ -184,6 +189,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		vector<generic_string> fileNames;
 		vector<generic_string> patterns;
 		patterns.push_back(TEXT("*.*"));
+
 
 		generic_string fileNameStr = notepadFile.getLongFileName();
 		if (notepadFile.getLongFileName()[lstrlen(notepadFile.getLongFileName()) - 1] != '\\')
