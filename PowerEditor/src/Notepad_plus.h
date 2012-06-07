@@ -290,6 +290,7 @@ public:
 	void getCurrentOpenedFiles(Session & session);
 
 	bool fileLoadSession(const TCHAR *fn = NULL);
+	bool fileLoadSession(NotepadFile notepadFile);
 	const TCHAR * fileSaveSession(size_t nbFile, TCHAR ** fileNames, const TCHAR *sessionFile2save);
 	const TCHAR * fileSaveSession(size_t nbFile = 0, TCHAR ** fileNames = NULL);
 	void changeToolBarIcons();
@@ -325,6 +326,7 @@ public:
 	bool createNewFile(NotepadFile notepadFile);
 	BufferID openAllFilesInDirectory(NotepadFile notepadFile);
 	BufferID openNormalFile(NotepadFile notepadFile, bool isReadOnly);
+	void removeFromRecentFileList(NotepadFile notepadFile);
 protected:
 	Notepad_plus_Window *_pPublicInterface;
     Window *_pMainWindow;

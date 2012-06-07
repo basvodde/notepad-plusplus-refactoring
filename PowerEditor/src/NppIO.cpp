@@ -240,12 +240,17 @@ BufferID Notepad_plus::openNormalFile(NotepadFile notepadFile, bool isReadOnly)
 	return buffer;
 }
 
-BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool isReadOnly)
+void Notepad_plus::removeFromRecentFileList(NotepadFile notepadFile)
 {
 	_lastRecentFileList.remove(notepadFile.getLongFileName());
+}
+
+BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool isReadOnly)
+{
+	removeFromRecentFileList(notepadFile);
 
 	if (notepadFile.isFileSession() && notepadFile.exists()) {
-		fileLoadSession(notepadFile.getLongFileName());
+		fileLoadSession(notepadFile);
 		return BUFFER_INVALID;
 	}
 
@@ -256,7 +261,6 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 	if (!notepadFile.exists())
 		if (!createNewFile(notepadFile))
 			return BUFFER_INVALID;
-
 
 	if (notepadFile.isDirectory())
 		return openAllFilesInDirectory(notepadFile);
@@ -1140,6 +1144,11 @@ bool Notepad_plus::loadSession(Session & session)
 	return allSessionFilesLoaded;
 }
 
+
+bool Notepad_plus::fileLoadSession(NotepadFile notepadFile)
+{
+	return fileLoadSession(notepadFile);
+}
 
 bool Notepad_plus::fileLoadSession(const TCHAR *fn)
 {
