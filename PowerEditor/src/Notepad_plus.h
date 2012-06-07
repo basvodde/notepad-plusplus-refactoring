@@ -323,6 +323,7 @@ public:
 
 	void updateTray();
 	bool createNewFile(NotepadFile notepadFile);
+	BufferID openAllFilesInDirectory(NotepadFile notepadFile);
 protected:
 	Notepad_plus_Window *_pPublicInterface;
     Window *_pMainWindow;
