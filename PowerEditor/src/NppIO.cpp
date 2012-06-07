@@ -147,13 +147,11 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encodi
 	if (encoding == -1)
 		notepadFile.setEncoding(getHtmlXmlEncoding(notepadFile.getLongFileName()));
 
-	size_t res = generic_string(fileName).find_first_of(UNTITLED_STR);
-	BufferID test = MainFileManager->getBufferFromName((res == 0) ? fileName : notepadFile.getLongFileName());
-	if (test != BUFFER_INVALID) {
-		//switchToFile(test);
-		//Dont switch, not responsibility of doOpen, but of caller
+	bool fileNameIsAnUnsavedNewFile = generic_string(fileName).find_first_of(PREFIX_FOR_NEW_DOCUMENT_NAMES) == 0;
+	BufferID bufferOfFileToOpen = MainFileManager->getBufferFromName(fileNameIsAnUnsavedNewFile ? fileName : notepadFile.getLongFileName());
+	if (bufferOfFileToOpen != BUFFER_INVALID) {
 		updateTray();
-		return test;
+		return bufferOfFileToOpen;
 	}
 
 	return openFileThatIsntOpenedYet(notepadFile, isReadOnly);

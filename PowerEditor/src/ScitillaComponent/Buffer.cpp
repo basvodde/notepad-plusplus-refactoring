@@ -685,7 +685,7 @@ bool FileManager::saveBuffer(BufferID id, const TCHAR * filename, bool isCopy) {
 
 BufferID FileManager::newEmptyDocument() 
 {
-	generic_string newTitle = UNTITLED_STR;
+	generic_string newTitle = PREFIX_FOR_NEW_DOCUMENT_NAMES;
 	TCHAR nb[10];
 	wsprintf(nb, TEXT(" %d"), _nextNewNumber);
 	_nextNewNumber++;
@@ -703,7 +703,7 @@ BufferID FileManager::newEmptyDocument()
 
 BufferID FileManager::bufferFromDocument(Document doc, bool dontIncrease, bool dontRef)  
 {
-	generic_string newTitle = UNTITLED_STR;
+	generic_string newTitle = PREFIX_FOR_NEW_DOCUMENT_NAMES;
 	TCHAR nb[10];
 	wsprintf(nb, TEXT(" %d"), _nextNewNumber);
 	newTitle += nb;

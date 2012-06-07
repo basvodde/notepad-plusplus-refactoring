@@ -68,7 +68,7 @@ struct HeaderLineState {
 };
 
 //const int userLangNameMax = 16;
-const TCHAR UNTITLED_STR[] = TEXT("new ");
+const TCHAR PREFIX_FOR_NEW_DOCUMENT_NAMES[] = TEXT("new ");
 
 //File manager class maintains all buffers
 class FileManager {
