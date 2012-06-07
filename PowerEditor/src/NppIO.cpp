@@ -228,8 +228,6 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		if (isReadOnly)
 			buf->setUserReadOnly(true);
 
-		_pluginsManager.notify(BeforeFileLoadNoticiation(getMainWindowHandle(), buffer));
-		
 		loadBufferIntoView(buffer, currentView());
 		updateTray();
 		_linkTriggered = true;
