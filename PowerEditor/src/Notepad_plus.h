@@ -205,6 +205,7 @@ public:
 	NotepadFile getDirectoryPart();
 
 	int getEncoding();
+	void setEncoding(int encoding);
 private:
 	TCHAR _longFileName[MAX_PATH];
 	int _encoding;

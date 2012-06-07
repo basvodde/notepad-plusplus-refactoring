@@ -93,6 +93,11 @@ int NotepadFile::getEncoding()
 	return _encoding;
 }
 
+void NotepadFile::setEncoding(int encoding)
+{
+	_encoding = encoding;
+}
+
 bool NotepadFile::isFileSession() {
 
 	// if file2open matches the ext of user defined session file ext, then it'll be opened as a session
@@ -127,7 +132,7 @@ NotepadFile NotepadFile::getDirectoryPart()
 
 bool NotepadFile::baseDirectoryExists()
 {
-	getDirectoryPart().exists();
+	return getDirectoryPart().exists();
 }
 
 bool NotepadFile::isDirectory()
@@ -138,6 +143,9 @@ bool NotepadFile::isDirectory()
 BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly, int encoding)
 {
 	NotepadFile notepadFile(fileName, encoding);
+
+	if (encoding == -1)
+		notepadFile.setEncoding(getHtmlXmlEncoding(notepadFile.getLongFileName()));
 
 	size_t res = generic_string(fileName).find_first_of(UNTITLED_STR);
 	BufferID test = MainFileManager->getBufferFromName((res == 0) ? fileName : notepadFile.getLongFileName());
@@ -179,12 +187,7 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		}
 	}
 
-	_pluginsManager.notify(BeforeFileLoadNoticiation(getMainWindowHandle()));
 
-	int encoding = notepadFile.getEncoding();
-	if (encoding == -1)
-		encoding = getHtmlXmlEncoding(notepadFile.getLongFileName());
-	
 	if (notepadFile.isDirectory()) {
 		vector<generic_string> fileNames;
 		vector<generic_string> patterns;
@@ -216,7 +219,9 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		return BUFFER_INVALID;
 	}
 
-	BufferID buffer = MainFileManager->loadFile(notepadFile.getLongFileName(), NULL, encoding);
+	_pluginsManager.notify(BeforeFileLoadNoticiation(getMainWindowHandle()));
+
+	BufferID buffer = MainFileManager->loadFile(notepadFile.getLongFileName(), NULL, notepadFile.getEncoding());
 
 	if (buffer != BUFFER_INVALID) {
 		Buffer * buf = MainFileManager->getBufferByID(buffer);
