@@ -207,27 +207,8 @@ BufferID Notepad_plus::openAllFilesInDirectory(NotepadFile notepadFile)
 
 }
 
-BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool isReadOnly)
+BufferID Notepad_plus::openNormalFile(NotepadFile notepadFile, bool isReadOnly)
 {
-	_lastRecentFileList.remove(notepadFile.getLongFileName());
-
-	if (notepadFile.isFileSession() && notepadFile.exists()) {
-		fileLoadSession(notepadFile.getLongFileName());
-		return BUFFER_INVALID;
-	}
-
-	TemporaryWow64FsRedirectionSwitch wow64FsRedirectionSwitch;
-	if (!notepadFile.exists())
-		wow64FsRedirectionSwitch.switchOff();
-
-	if (!notepadFile.exists())
-		if (createNewFile(notepadFile))
-			return BUFFER_INVALID;
-
-
-	if (notepadFile.isDirectory())
-		return openAllFilesInDirectory(notepadFile);
-
 	_pluginsManager.notify(BeforeFileLoadNoticiation(getMainWindowHandle()));
 
 	BufferID buffer = MainFileManager->loadFile(notepadFile.getLongFileName(), NULL, notepadFile.getEncoding());
@@ -257,6 +238,30 @@ BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool
 		_pluginsManager.notify(LoadingFileFailedNotification(getMainWindowHandle()));
 	}
 	return buffer;
+}
+
+BufferID Notepad_plus::openFileThatIsntOpenedYet(NotepadFile& notepadFile,  bool isReadOnly)
+{
+	_lastRecentFileList.remove(notepadFile.getLongFileName());
+
+	if (notepadFile.isFileSession() && notepadFile.exists()) {
+		fileLoadSession(notepadFile.getLongFileName());
+		return BUFFER_INVALID;
+	}
+
+	TemporaryWow64FsRedirectionSwitch wow64FsRedirectionSwitch;
+	if (!notepadFile.exists())
+		wow64FsRedirectionSwitch.switchOff();
+
+	if (!notepadFile.exists())
+		if (!createNewFile(notepadFile))
+			return BUFFER_INVALID;
+
+
+	if (notepadFile.isDirectory())
+		return openAllFilesInDirectory(notepadFile);
+
+	return openNormalFile(notepadFile, isReadOnly);
 }
 
 
